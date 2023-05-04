@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:moviles/src/pages/PasswordResetPage.dart';
 
+import 'NavigationBar.dart';
+
 class LoginPage extends StatefulWidget {
   static String id = 'login_page';
 
@@ -107,7 +109,25 @@ class _LoginPageState extends State<LoginPage> {
     return ElevatedButton(
       onPressed: () {
         if (_formKey.currentState!.validate()) {
-          // Aquí iría el código para validar el inicio de sesión
+          if (_userController.text == "karen" &&
+              _passwordController.text == "1234") {
+            Navigator.pushNamed(context, NextPage.id);
+          } else if (_userController.text == "karen") {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Contraseña incorrecta'),
+              ),
+            );
+            _passwordController.clear();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Usuario no existe'),
+              ),
+            );
+            _userController.clear();
+            _passwordController.clear();
+          }
         }
       },
       child: Text('Iniciar sesión'),

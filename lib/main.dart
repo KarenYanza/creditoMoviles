@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moviles/src/pages/NavigationBar.dart';
 import 'package:moviles/src/pages/PasswordResetPage.dart';
 import 'package:moviles/src/pages/login_page.dart';
 
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       routes: {
         LoginPage.id: (context) => LoginPage(),
         PasswordResetPage.id: (context) => PasswordResetPage(),
+        NextPage.id: (context) => NextPage(),
       },
     );
   }
