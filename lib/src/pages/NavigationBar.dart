@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:moviles/src/pages/DetallePage.dart';
+import 'package:moviles/src/pages/login_page.dart';
 
 class NextPage extends StatefulWidget {
   static String id = 'next_page';
@@ -7,19 +9,26 @@ class NextPage extends StatefulWidget {
   _NextPageState createState() => _NextPageState();
 }
 
-class _NextPageState extends State<NextPage> {
-  int _currentIndex = 0;
-
-  final List<Widget> _children = [
-    FirstPage(),
-    SecondPage(),
-    ThirdPage(),
+class _NextPageState extends State<NextPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  List<Tab> _tabs = [
+    Tab(text: 'Todos'),
+    Tab(text: 'Pendientes'),
+    Tab(text: 'Aprobados'),
+    Tab(text: 'Rechazados'),
   ];
-
-  void onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+  static List<Factura> _data = [
+    Factura(
+        id: 1, nombre: 'Karen Yanzaguano', fecha: '01/01/2022', monto: 100.0),
+    Factura(
+        id: 2, nombre: 'Anthony Morocho', fecha: '02/01/2022', monto: 200.0),
+    Factura(id: 3, nombre: 'Laura Zambrano', fecha: '03/01/2022', monto: 300.0),
+  ];
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _tabs.length, vsync: this);
   }
 
   @override
@@ -27,53 +36,118 @@ class _NextPageState extends State<NextPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Bienvenido'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: _tabs,
+        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Cerrar sesión"),
+                    content: Text("¿Está seguro de que desea cerrar sesión?"),
+                    actions: [
+                      TextButton(
+                        child: Text("Cancelar"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: Text("Aceptar"),
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(LoginPage.id);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                backgroundImage: AssetImage('images/logo.png'),
+              ),
+            ),
+          ),
+        ],
       ),
-      body: _children[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: onTabTapped,
-        currentIndex: _currentIndex,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'First',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.mail),
-            label: 'Second',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Third',
-          ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildTodosScreen(),
+          _buildPendientesScreen(),
+          _buildAprobadosScreen(),
+          _buildRechazadosScreen(),
         ],
       ),
     );
   }
-}
 
-class FirstPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTodosScreen() {
+    return ListView.builder(
+      itemCount: _data.length,
+      itemBuilder: (context, index) {
+        final item = _data[index];
+        return InkWell(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => DetallePage(
+                  id: item.id,
+                  nombre: item.nombre,
+                  fecha: item.fecha,
+                  monto: item.monto,
+                ),
+              ),
+            );
+          },
+          child: ListTile(
+            title: Text(item.nombre),
+            subtitle: Text('Fecha: ${item.fecha} - Monto: ${item.monto}'),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPendientesScreen() {
+    // código para construir la pantalla de datos pendientes
     return Center(
-      child: Text('First Page'),
+      child: Text('Pantalla de datos pendientes'),
+    );
+  }
+
+  Widget _buildAprobadosScreen() {
+    // código para construir la pantalla de datos aprobados
+    return Center(
+      child: Text('Pantalla de datos aprobados'),
+    );
+  }
+
+  Widget _buildRechazadosScreen() {
+    // código para construir la pantalla de datos rechazados
+    return Center(
+      child: Text('Pantalla de datos rechazados'),
     );
   }
 }
 
-class SecondPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Second Page'),
-    );
-  }
-}
+class Factura {
+  final int id;
+  final String nombre;
+  final String fecha;
+  final double monto;
 
-class ThirdPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Third Page'),
-    );
-  }
+  Factura({
+    required this.id,
+    required this.nombre,
+    required this.fecha,
+    required this.monto,
+  });
 }
