@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moviles/src/pages/PasswordResetPage.dart';
-
 import 'NavigationBar.dart';
+import 'NavigationBar1.dart';
 
 class LoginPage extends StatefulWidget {
   static String id = 'login_page';
@@ -15,6 +15,10 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
+  List<Map<String, dynamic>> _users = [
+    {'username': '0302114772', 'password': '1234', 'role': 1},
+    {'username': '1204261992', 'password': '1999', 'role': 2},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -109,24 +113,25 @@ class _LoginPageState extends State<LoginPage> {
     return ElevatedButton(
       onPressed: () {
         if (_formKey.currentState!.validate()) {
-          if (_userController.text == "karen" &&
-              _passwordController.text == "1234") {
-            Navigator.pushNamed(context, NextPage.id);
-          } else if (_userController.text == "karen") {
+          bool userFound = false;
+          for (var user in _users) {
+            if (user['username'] == _userController.text &&
+                user['password'] == _passwordController.text) {
+              userFound = true;
+              if (user['role'] == 1) {
+                // Navigate to screen for role 1 user
+                Navigator.pushNamed(context, NextPage.id);
+              } else if (user['role'] == 2) {
+                // Navigate to screen for role 2 user
+                Navigator.pushNamed(context, NextPage1.id);
+              }
+              break;
+            }
+          }
+          if (!userFound) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Contraseña incorrecta'),
-              ),
+              SnackBar(content: Text('Usuario o contraseña inválido')),
             );
-            _passwordController.clear();
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Usuario no existe'),
-              ),
-            );
-            _userController.clear();
-            _passwordController.clear();
           }
         }
       },
