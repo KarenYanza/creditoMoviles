@@ -114,7 +114,15 @@ class _DetallePageState extends State<DetallePage> {
                       print('Todo está correcto');
                     } else {
                       // Lógica para imprimir si hay campos incorrectos
-                      print('Hay campos incorrectos');
+                      // Buscamos los campos incorrectos y los imprimimos
+                      List<String> incorrectos = [];
+                      checkStatus.forEach((campo, correcto) {
+                        if (!correcto) {
+                          incorrectos.add(campo);
+                        }
+                      });
+                      print(
+                          'Hay campos incorrectos: ${incorrectos.join(", ")}');
                     }
                   },
                   child: Text('Imprimir'),
