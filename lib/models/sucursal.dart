@@ -18,13 +18,13 @@ class Sucursal {
     required this.credito,
   });
 
-  factory Sucursal.fromMap(Map sucursalmap) {
+  factory Sucursal.fromJson(Map<String, dynamic> json) {
     return Sucursal(
-      sucu_id: sucursalmap['sucu_id'],
-      sucu_estado: sucursalmap['sucu_estado'],
-      usuario: sucursalmap['usuario'],
-      direccion: sucursalmap['direccion'],
-      credito: sucursalmap['credito'],
+      sucu_id: json['sucu_id'],
+      sucu_estado: json['sucu_estado'],
+      usuario: Usuario.fromJson(json['usuario']),
+      direccion: Direccion.fromJson(json['direccion']),
+      credito: Credito.fromJson(json['credito']),
     );
   }
   

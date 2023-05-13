@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       routes: {
         LoginPage.id: (context) => LoginPage(),
         PasswordResetPage.id: (context) => PasswordResetPage(),
-        NextPage.id: (context) => NextPage(),
+        
         NextPage1.id: (context) => NextPage1(),
       },
     );

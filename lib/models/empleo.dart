@@ -30,19 +30,19 @@ class Empleo {
     required this.conyugue,
   });
 
-  factory Empleo.fromMap(Map empleomap) {
+  factory Empleo.fromJson(Map<String, dynamic> json) {
     return Empleo(
-      empl_id: empleomap['empl_id'],
-      empl_tipoEmpleado: empleomap['empl_tipoEmpleado'],
-      empl_actividadEmpresa: empleomap['empl_actividadEmpresa'],
-      empl_nombreEmpresa: empleomap['empl_nombreEmpresa'],
-      empl_cargoEmpresa: empleomap['empl_cargoEmpresa'],
-      empl_estado: empleomap['empl_estado'],
-      empl_telefonoEmpresa: empleomap['empl_telefonoEmpresa'],
-      empl_referenciaEmpresa: empleomap['empl_referenciaEmpresa'],
-      empl_tiempoEmpresa: empleomap['empl_tiempoEmpresa'],
-      direccion: empleomap['direccion'],
-      conyugue: empleomap['conyugue'],
+      empl_id: json['empl_id'],
+      empl_tipoEmpleado: json['empl_tipoEmpleado'],
+      empl_actividadEmpresa: json['empl_actividadEmpresa'],
+      empl_nombreEmpresa: json['empl_nombreEmpresa'],
+      empl_cargoEmpresa: json['empl_cargoEmpresa'],
+      empl_estado: json['empl_estado'],
+      empl_telefonoEmpresa: json['empl_telefonoEmpresa'],
+      empl_referenciaEmpresa: json['empl_referenciaEmpresa'],
+      empl_tiempoEmpresa: json['empl_tiempoEmpresa'],
+      direccion: Direccion.fromJson(json['direccion']),
+      conyugue: Conyugue.fromJson(json['conyugue']),
     );
   }
   void toggle() {

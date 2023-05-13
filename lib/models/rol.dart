@@ -16,13 +16,12 @@ class Rol {
     
   });
 
-  factory Rol.fromMap(Map rolmap) {
+  factory Rol.fromJson(Map<String, dynamic> json) {
     return Rol(
-      rol_id: rolmap['rol_id'],
-      rol_nombre: rolmap['rol_nombre'],
-      rol_descripcion: rolmap['rol_descripcion'],
-      rol_estado: rolmap['rol_estado'],
-      
+      rol_id: json['rol_id'],
+      rol_nombre: json['rol_nombre'],
+      rol_descripcion: json['rol_descripcion'],
+      rol_estado: json['rol_estado'],
     );
   }
   void toggle() {

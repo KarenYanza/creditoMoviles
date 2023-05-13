@@ -20,18 +20,17 @@ class Credito {
 
   });
 
-  factory Credito.fromMap(Map creditomap) {
+  factory Credito.fromJson(Map<String, dynamic> json) {
     return Credito(
-      cred_id: creditomap['cred_id'],
-      cred_fecha: creditomap['cred_fecha'],
-      cred_monto: creditomap['cred_monto'],
-      cred_plazo: creditomap['cred_plazo'],
-      cred_numero: creditomap['cred_numero'],
-      cred_estado: creditomap['cred_estado'],
-      sucursal: creditomap['sucursal'],
-      );
+      cred_id: json['cred_id'],
+      cred_fecha: json['cred_fecha'],
+      cred_monto: json['cred_monto'],
+      cred_plazo: json['cred_plazo'],
+      cred_numero: json['cred_numero'],
+      cred_estado: json['cred_estado'],
+      sucursal: Sucursal.fromJson(json['sucursal']),
+    );
   }
-  
   void toggle() {
     cred_estado = !cred_estado;
   }

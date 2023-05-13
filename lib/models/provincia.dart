@@ -19,14 +19,14 @@ class Provincia {
    
   });
 
-  factory Provincia.fromMap(Map provinciamap) {
+  factory Provincia.fromJson(Map<String, dynamic> json) {
     return Provincia(
-      prov_id: provinciamap['prov_id'],
-      prov_codigo: provinciamap['prov_codigo'],
-      prov_nombre: provinciamap['prov_nombre'],
-      prov_estado: provinciamap['prov_estado'],
-      sucursal: provinciamap['sucursal'],
-      provincia: provinciamap['provincia'],
+      prov_id: json['prov_id'],
+      prov_codigo: json['prov_codigo'],
+      prov_nombre: json['prov_nombre'],
+      prov_estado: json['prov_estado'],
+      sucursal: Sucursal.fromJson(json['sucursal']),
+      provincia: Provincia.fromJson(json['provincia']),
     );
   }
   void toggle() {

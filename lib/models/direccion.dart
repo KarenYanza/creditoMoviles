@@ -27,17 +27,17 @@ class Direccion {
     required this.empleo,
   });
 
-  factory Direccion.fromMap(Map direccionmap) {
+ factory Direccion.fromJson(Map<String, dynamic> json) {
     return Direccion(
-      dire_id: direccionmap['dire_id'],
-      dire_calle: direccionmap['dire_calle'],
-      dire_numero: direccionmap['dire_numero'],
-      dire_interseccion: direccionmap['dire_interseccion'],
-      dire_sector: direccionmap['dire_sector'],
-      dire_estado: direccionmap['dire_estado'],
-      sucursal: direccionmap['sucursal'],
-      provincia: direccionmap['provincia'],
-      empleo: direccionmap['empleo'],
+      dire_id: json['dire_id'],
+      dire_calle: json['dire_calle'],
+      dire_numero: json['dire_numero'],
+      dire_interseccion: json['dire_interseccion'],
+      dire_sector: json['dire_sector'],
+      dire_estado: json['dire_estado'],
+      sucursal: Sucursal.fromJson(json['sucursal']),
+      provincia: Provincia.fromJson(json['provincia']),
+      empleo: Empleo.fromJson(json['empleo']),
     );
   }
   void toggle() {

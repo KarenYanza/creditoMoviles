@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:moviles/models/persona.dart';
 import 'package:moviles/models/rol.dart';
 import 'package:moviles/models/sucursal.dart';
@@ -10,9 +12,9 @@ class Usuario {
   final String usua_preguntaUno;
   final String usua_PreguntaDos;
   bool usua_estado;
-  final  Persona persona;
+  final Persona persona;
   final Rol rol;
-  final Sucursal sucursal;
+  //final Sucursal sucursal;
 
   Usuario({
     required this.id,
@@ -24,25 +26,25 @@ class Usuario {
     this.usua_estado = false,
     required this.persona,
     required this.rol,
-    required this.sucursal,
+   // required this.sucursal,
   });
 
-  factory Usuario.fromMap(Map usuariomap) {
+  factory Usuario.fromJson(Map<String, dynamic> json) {
     return Usuario(
-      id: usuariomap['id'],
-      usua_username: usuariomap['usuario'],
-      usua_password: usuariomap['password'],
-      usua_fechaRegistro: usuariomap['fecha_registro'],
-      usua_preguntaUno: usuariomap['pregunta_uno'],
-      usua_PreguntaDos: usuariomap['pregunta_dos'],
-      usua_estado: usuariomap['estado_usu'],
-      persona: usuariomap['persona'],
-      rol: usuariomap['rol'],
-      sucursal: usuariomap['sucursal'],
+      id: json['usuario_id'],
+      usua_username: json['username'],
+      usua_password: json['password'],
+      usua_fechaRegistro: json['fecha_registro'],
+      usua_preguntaUno: json['pregunta_uno'],
+      usua_PreguntaDos: json['pregunta_dos'],
+      usua_estado: json['usuario_estado'],
+      persona: Persona.fromJson(json['persona']),
+      rol: Rol.fromJson(json['rol']),
+    //  sucursal: Sucursal.fromJson(json['sucursal']),
     );
   }
+  
   void toggle() {
     usua_estado = !usua_estado;
   }
 }
-

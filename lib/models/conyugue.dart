@@ -12,11 +12,10 @@ class Conyugue {
     
   });
 
-  factory Conyugue.fromMap(Map conyuguemap) {
+  factory Conyugue.fromJson(Map<String, dynamic> json) {
     return Conyugue(
-      cony_id: conyuguemap['cony_id'],
-      cony_estado: conyuguemap['cony_estado'],
-      
+      cony_id: json['cony_id'],
+      cony_estado: json['cony_estado'],
     );
   }
   void toggle() {

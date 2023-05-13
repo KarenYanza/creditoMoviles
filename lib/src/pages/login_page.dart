@@ -1,27 +1,54 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:moviles/Services/database_services.dart';
+import 'package:moviles/models/usuario.dart';
 import 'package:moviles/src/pages/PasswordResetPage.dart';
 import 'NavigationBar.dart';
 import 'NavigationBar1.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   static String id = 'login_page';
-
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+  late List<Map<Usuario, dynamic>> _users;
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _loading = false;
   bool _obscureText = true;
-  List<Map<String, dynamic>> _users = [
-    {'username': '0302114772', 'password': '1234', 'role': 1},
-    {'username': '1204261992', 'password': '1999', 'role': 2},
-  ];
+  getTasks() async {
+    _users = (await DatabaseServices.getTasks()).cast<Map<Usuario, dynamic>>();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getTasks();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return Center(
+        child: Stack(
+          children: [
+            Lottie.network(
+                'https://assets6.lottiefiles.com/packages/lf20_C67qsN3hAk.json'),
+
+            //child: Lottie.asset('assets/loading.json'),
+          ],
+        ),
+      );
+    }
     return SafeArea(
       child: Scaffold(
         body: Center(
@@ -114,29 +141,49 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () {
         if (_formKey.currentState!.validate()) {
           bool userFound = false;
-          for (var user in _users) {
-            if (user['username'] == _userController.text &&
-                user['password'] == _passwordController.text) {
-              userFound = true;
-              if (user['role'] == 1) {
-                // Navigate to screen for role 1 user
-                Navigator.pushNamed(context, NextPage.id);
-              } else if (user['role'] == 2) {
-                // Navigate to screen for role 2 user
-                Navigator.pushNamed(context, NextPage1.id);
-              }
-              break;
-            }
-          }
-          if (!userFound) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Usuario o contraseña inválido')),
-            );
-          }
+
+          login(_userController.text, _passwordController.text);
         }
       },
       child: Text('Iniciar sesión'),
     );
+  }
+
+  Future<void> login(String username, String password) async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      String url =
+          "http://localhost:8080/api/usuarios/login/$username/$password";
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        // El servidor devolvió una respuesta exitosa
+        final jsonResponse = json.decode(response.body);
+        Usuario u = Usuario.fromJson(jsonResponse);
+        if (u.rol.rol_id == 1) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => NextPage(usuario: u)));
+        } else if (u.rol.rol_id == 2) {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => NextPage1()));
+        }
+      } else {
+        // El servidor devolvió un error
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuario o contraseña inválido')),
+        );
+      }
+    } catch (error) {
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
   }
 
   Widget _buildRegisterButton() {

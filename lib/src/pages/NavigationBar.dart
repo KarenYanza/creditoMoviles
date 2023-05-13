@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:moviles/models/usuario.dart';
 import 'package:moviles/src/pages/DetallePage.dart';
 import 'package:moviles/src/pages/login_page.dart';
 
 class NextPage extends StatefulWidget {
-  static String id = 'next_page';
+  final Usuario usuario;
 
+  NextPage({required this.usuario});
   @override
   _NextPageState createState() => _NextPageState();
 }
 
 class _NextPageState extends State<NextPage>
     with SingleTickerProviderStateMixin {
+  late Usuario usuario;
   late TabController _tabController;
   List<Tab> _tabs = [
     Tab(text: 'Todos'),
@@ -18,6 +21,7 @@ class _NextPageState extends State<NextPage>
     Tab(text: 'Aprobados'),
     Tab(text: 'Rechazados'),
   ];
+
   static List<Factura> _data = [
     Factura(
         id: 1, nombre: 'Karen Yanzaguano', fecha: '01/01/2022', monto: 100.0),
@@ -27,15 +31,18 @@ class _NextPageState extends State<NextPage>
   ];
   @override
   void initState() {
+    usuario = widget.usuario;
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
+    print(usuario.usua_PreguntaDos);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bienvenido'),
+        title: Text(
+            'Bienvenido ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}  '),
         bottom: TabBar(
           controller: _tabController,
           tabs: _tabs,
@@ -71,7 +78,12 @@ class _NextPageState extends State<NextPage>
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
-                backgroundImage: AssetImage('images/logo.png'),
+                // backgroundImage: AssetImage('images/logo.png'),
+
+                backgroundImage: Image.network(
+                  'https://estaticos-cdn.sport.es/clip/ca7f0dcb-54dc-4929-9cf4-b085528d8219_media-libre-aspect-ratio_default_0.jpg',
+                  //usuario.persona.pers_foto,
+                ).image,
               ),
             ),
           ),

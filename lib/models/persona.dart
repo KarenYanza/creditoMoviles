@@ -19,8 +19,7 @@ class Persona {
   final String pers_nacionalidad;
   final String pers_codigoPostal;
   bool pers_estado;
-  final Usuario usuario;
-  final Conyugue conyugue;
+  
 
   Persona({
     required this.pers_id,
@@ -40,31 +39,30 @@ class Persona {
     required this.pers_nacionalidad,
     required this.pers_codigoPostal,
     this.pers_estado = false,
-    required this.usuario,
-    required this.conyugue,
+   
   });
 
-  factory Persona.fromMap(Map personamap) {
+  factory Persona.fromJson(Map<String, dynamic> json) {
     return Persona(
-      pers_id: personamap['pers_id'],
-      pers_cedula: personamap['pers_cedula'],
-      pers_nombres: personamap['pers_nombres'],
-      pers_apellidos: personamap['pers_apellidos'],
-      pers_fechaNacimiento: personamap['pers_fechaNacimiento'],
-      pers_sexo: personamap['pers_sexo'],
-      pers_genero: personamap['pers_genero'],
-      pers_foto: personamap['pers_foto'],
-      pers_estadoCivil: personamap['pers_estadoCivil'],
-      pers_nivelInstruccion: personamap['pers_nivelInstruccion'],
-      pers_profesion: personamap['pers_profesion'],
-      pers_correo: personamap['pers_correo'],
-      pers_celular: personamap['pers_celular'],
-      pers_telefono: personamap['pers_telefono'],
-      pers_nacionalidad: personamap['pers_nacionalidad'],
-      pers_codigoPostal: personamap['pers_codigoPostal'],
-      pers_estado: personamap['pers_estado'],
-      usuario: personamap['usuario'],
-      conyugue: personamap['conyugue'],
+      pers_id: json['pers_id'],
+      pers_cedula: json['pers_cedula'],
+      pers_nombres: json['pers_nombres'],
+      pers_apellidos: json['pers_apellidos'],
+      pers_fechaNacimiento: json['pers_fechaNacimiento'],
+      pers_sexo: json['pers_sexo'],
+      pers_genero: json['pers_genero'],
+      pers_foto: json['pers_foto']??'',
+      pers_estadoCivil: json['pers_estadoCivil'],
+      pers_nivelInstruccion: json['pers_nivelInstruccion'],
+      pers_profesion: json['pers_profesion'],
+      pers_correo: json['pers_correo'],
+      pers_celular: json['pers_celular'],
+      pers_telefono: json['pers_telefono']??'',
+      pers_nacionalidad: json['pers_nacionalidad'],
+      pers_codigoPostal: json['pers_codigoPostal'],
+      pers_estado: json['pers_estado'],
+     
+      
     );
   }
   void toggle() {
