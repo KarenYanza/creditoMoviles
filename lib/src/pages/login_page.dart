@@ -24,16 +24,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
   bool _obscureText = true;
-  getTasks() async {
-    _users = (await DatabaseServices.getTasks()).cast<Map<Usuario, dynamic>>();
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    getTasks();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,21 +147,22 @@ class _LoginPageState extends State<LoginPage> {
       String url =
           "http://localhost:8080/api/usuarios/login/$username/$password";
       final response = await http.get(Uri.parse(url));
-
       if (response.statusCode == 200) {
         // El servidor devolvió una respuesta exitosa
         final jsonResponse = json.decode(response.body);
         Usuario u = Usuario.fromJson(jsonResponse);
-        if (u.rol.rol_id == 1) {
+
+        if (u.rol.rol_id == 3) {
+          //Administrador
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => NextPage(usuario: u)));
-        } else if (u.rol.rol_id == 2) {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => NextPage1()));
+        } else if (u.rol.rol_id == 4) {
+          //Cliente
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => NextPage1(usuario: u)));
         }
       } else {
         // El servidor devolvió un error
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Usuario o contraseña inválido')),
         );

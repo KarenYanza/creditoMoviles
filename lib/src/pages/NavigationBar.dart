@@ -34,7 +34,7 @@ class _NextPageState extends State<NextPage>
     usuario = widget.usuario;
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    print(usuario.usua_PreguntaDos);
+    print(usuario.usua_pregunta_dos);
   }
 
   @override
@@ -81,8 +81,8 @@ class _NextPageState extends State<NextPage>
                 // backgroundImage: AssetImage('images/logo.png'),
 
                 backgroundImage: Image.network(
-                  'https://estaticos-cdn.sport.es/clip/ca7f0dcb-54dc-4929-9cf4-b085528d8219_media-libre-aspect-ratio_default_0.jpg',
-                  //usuario.persona.pers_foto,
+                  //'https://estaticos-cdn.sport.es/clip/ca7f0dcb-54dc-4929-9cf4-b085528d8219_media-libre-aspect-ratio_default_0.jpg',
+                  usuario.persona.pers_foto,
                 ).image,
               ),
             ),

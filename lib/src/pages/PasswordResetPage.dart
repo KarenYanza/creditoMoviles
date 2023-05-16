@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
+
+import '../../models/usuario.dart';
 
 class PasswordResetPage extends StatefulWidget {
   static const String id = 'password_reset';
@@ -14,6 +19,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   String _responseMessage = "";
   bool _showVerification = false;
   String _securityQuestion = "";
+  bool _userFound = false;
 
   final Map<String, Map<String, dynamic>> _users = {
     "0302114772": {
@@ -25,9 +31,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
     }
   };
 
-  void _resetPassword() {
-    String username = _usernameController.text;
-
+  void _resetPassword(String username) {
     if (!_users.containsKey(username)) {
       setState(() {
         _responseMessage =
@@ -42,6 +46,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       setState(() {
         _securityQuestion = user["verification"];
         _showVerification = true;
+        _userFound = true;
       });
     }
   }
@@ -50,15 +55,6 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
     String verification = _verificationController.text;
     String verification1 = _verification1Controller.text;
     String username = _usernameController.text;
-
-    if (!_users.containsKey(username)) {
-      setState(() {
-        _responseMessage =
-            "*Usted es Asesor Financiero porfavor contactarse con servicio tecnico para restablecimiento de su contraseña";
-        _showVerification = false;
-      });
-      return;
-    }
 
     Map<String, dynamic>? user = _users[username];
 
@@ -71,6 +67,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         _showVerification = false;
         _verificationController.clear(); // limpia los campos de texto
         _verification1Controller.clear();
+        _userFound = false;
       });
       return;
     }
@@ -127,13 +124,19 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                   TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(),
+                    enabled: !_userFound,
+                  ),
+                  SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: () => obtenerUsuario(_usernameController.text),
+                    child: Text("Buscar"),
                   ),
                   SizedBox(height: 16.0),
                   if (_showVerification)
                     Column(
                       children: [
                         Text(
-                          "¿Cual es el nombre de tu primera mascota?",
+                          "¿Cuál es el nombre de tu primera mascota?",
                           style: TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,
@@ -145,7 +148,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                         ),
                         SizedBox(height: 10.0),
                         Text(
-                          "¿Cual es tu color favorito?",
+                          "¿Cuál es tu color favorito?",
                           style: TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,
@@ -156,13 +159,13 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                           decoration: InputDecoration(),
                         ),
                         SizedBox(height: 16.0),
+                        ElevatedButton(
+                          onPressed: () =>
+                              restableceContra(_usernameController.text),
+                          child: Text("Verificar"),
+                        ),
                       ],
                     ),
-                  ElevatedButton(
-                    onPressed:
-                        _showVerification ? _verifyAnswer : _resetPassword,
-                    child: Text(_showVerification ? "Verificar" : "Buscar"),
-                  ),
                   SizedBox(height: 16.0),
                   Text(_responseMessage),
                 ],
@@ -173,4 +176,86 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       ),
     );
   }
+
+  Future<void> obtenerUsuario(String username) async {
+    try {
+      String url = "http://localhost:8080/api/usuarios/search/$username";
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        // El servidor devolvió una respuesta exitosa
+        final jsonResponse = json.decode(response.body);
+        print("Entre al metodo");
+        print("udrt" + _usernameController.text);
+        Usuario u = Usuario.fromJson(jsonResponse);
+        print(u.persona.pers_cedula);
+        if (u.rol.rol_id == 3) {
+          setState(() {
+            _showVerification = true;
+            _userFound = true;
+          });
+        } else if (u.rol.rol_id == 1 ||
+            u.rol.rol_id == 2 ||
+            u.rol.rol_id == 4) {
+          //Cliente
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Usted es empleado comuniquese con el tecnico ')),
+          );
+        }
+      } else {
+        // El servidor devolvió un error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuario inválido')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Usuario inválido')),
+      );
+    }
+  }
+
+  Future<void> restableceContra(String username) async {
+  try {
+    String url = "http://localhost:8080/api/usuarios/restablecer/$username";
+    final response = await http.put(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      print("Entré al método");
+      print("Usuario: " + _usernameController.text);
+      Usuario u = Usuario.fromJson(jsonResponse);
+      print(u.persona.pers_cedula);
+      if (_usernameController.text.isEmpty ||
+          _verificationController.text != u.usua_pregunta_uno||
+          _verification1Controller.text != u.usua_pregunta_dos) {
+        setState(() {
+          _responseMessage = "Respuesta incorrecta.";
+          _showVerification = false;
+          _verificationController.clear();
+          _verification1Controller.clear();
+          _userFound = false;
+        });
+        return;
+      }
+
+      setState(() {
+        _responseMessage =
+            "Tu contraseña ha sido enviada a " + u.persona.pers_correo;
+        _showVerification = false;
+        _usernameController.clear();
+        _verificationController.clear();
+        _verification1Controller.clear();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Usuario inválido')),
+      );
+    }
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Usuario inválido')),
+    );
+  }
+}
+
 }

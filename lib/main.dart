@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         LoginPage.id: (context) => LoginPage(),
         PasswordResetPage.id: (context) => PasswordResetPage(),
         
-        NextPage1.id: (context) => NextPage1(),
+        //NextPage1.id: (context) => NextPage1(),
       },
     );
   }

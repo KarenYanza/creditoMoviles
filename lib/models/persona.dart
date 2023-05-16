@@ -39,8 +39,9 @@ class Persona {
     required this.pers_nacionalidad,
     required this.pers_codigoPostal,
     this.pers_estado = false,
-   
   });
+  
+  
 
   factory Persona.fromJson(Map<String, dynamic> json) {
     return Persona(
@@ -51,18 +52,16 @@ class Persona {
       pers_fechaNacimiento: json['pers_fechaNacimiento'],
       pers_sexo: json['pers_sexo'],
       pers_genero: json['pers_genero'],
-      pers_foto: json['pers_foto']??'',
+      pers_foto: json['pers_foto'] ?? '',
       pers_estadoCivil: json['pers_estadoCivil'],
       pers_nivelInstruccion: json['pers_nivelInstruccion'],
       pers_profesion: json['pers_profesion'],
       pers_correo: json['pers_correo'],
       pers_celular: json['pers_celular'],
-      pers_telefono: json['pers_telefono']??'',
+      pers_telefono: json['pers_telefono'] ?? '',
       pers_nacionalidad: json['pers_nacionalidad'],
       pers_codigoPostal: json['pers_codigoPostal'],
       pers_estado: json['pers_estado'],
-     
-      
     );
   }
   void toggle() {

@@ -1,27 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:moviles/models/usuario.dart';
 import 'package:moviles/src/pages/DetallePage.dart';
 import 'package:moviles/src/pages/login_page.dart';
 
 class NextPage1 extends StatefulWidget {
-  static String id = 'next_page1';
+  final Usuario usuario;
 
+  NextPage1({required this.usuario});
   @override
   _NextPageState1 createState() => _NextPageState1();
 }
 
 class _NextPageState1 extends State<NextPage1>
     with SingleTickerProviderStateMixin {
+      late Usuario usuario;
+
   final List<Solicitud> solicitudes = [
     Solicitud(fecha: '02/05/2023', monto: 200.0, estado: 'Aprobado'),
     Solicitud(fecha: '01/05/2023', monto: 150.0, estado: 'Rechazado'),
     Solicitud(fecha: '29/04/2023', monto: 100.0, estado: 'Pendiente'),
   ];
+  @override
+  void initState() {
+    usuario = widget.usuario;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tabla de Solicitudes'),
+        title: Text(
+            'Bienvenido ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}  '),
         automaticallyImplyLeading: false,
         actions: [
           GestureDetector(
@@ -53,7 +63,12 @@ class _NextPageState1 extends State<NextPage1>
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
-                backgroundImage: AssetImage('images/logo.png'),
+                // backgroundImage: AssetImage('images/logo.png'),
+
+                backgroundImage: Image.network(
+                  //'https://estaticos-cdn.sport.es/clip/ca7f0dcb-54dc-4929-9cf4-b085528d8219_media-libre-aspect-ratio_default_0.jpg',
+                  usuario.persona.pers_foto,
+                ).image,
               ),
             ),
           ),
