@@ -1,7 +1,9 @@
-import 'package:moviles/models/conyugue.dart';
-import 'package:moviles/models/direccion.dart';
-import 'package:moviles/models/provincia.dart';
-import 'package:moviles/models/sucursal.dart';
+import 'conyugue.dart';
+import 'direccion.dart';
+import 'provincia.dart';
+import 'sucursal.dart';
+import 'solicitud.dart';
+
 
 class Empleo {
   final int empl_id;
@@ -15,6 +17,7 @@ class Empleo {
   final String empl_tiempoEmpresa;
   final Direccion direccion;
   final Conyugue conyugue;
+  final Solicitud solicitud;
 
   Empleo({
     required this.empl_id,
@@ -28,6 +31,7 @@ class Empleo {
     required this.empl_tiempoEmpresa,
     required this.direccion,
     required this.conyugue,
+    required this.solicitud,
   });
 
   factory Empleo.fromJson(Map<String, dynamic> json) {
@@ -43,6 +47,7 @@ class Empleo {
       empl_tiempoEmpresa: json['empl_tiempoEmpresa'],
       direccion: Direccion.fromJson(json['direccion']),
       conyugue: Conyugue.fromJson(json['conyugue']),
+      solicitud: Solicitud.fromJson(json['solicitud']),
     );
   }
   void toggle() {

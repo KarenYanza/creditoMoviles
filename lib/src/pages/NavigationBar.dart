@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:moviles/models/usuario.dart';
 import 'package:moviles/src/pages/DetallePage.dart';
 import 'package:moviles/src/pages/login_page.dart';
+import 'package:http/http.dart' as http;
+import '../../models/solicitud.dart';
 
 class NextPage extends StatefulWidget {
   final Usuario usuario;
@@ -147,6 +151,25 @@ class _NextPageState extends State<NextPage>
     return Center(
       child: Text('Pantalla de datos rechazados'),
     );
+  }
+}
+
+Future<List<Solicitud>> listarSolicitudesEstado() async {
+  try {
+    String url = "http://localhost:8080/api/usuarios/listarSoliEstado";
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      List<Solicitud> solicitudes = [];
+      for (var item in jsonResponse) {
+        solicitudes.add(Solicitud.fromJson(item));
+      }
+      return solicitudes;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    return [];
   }
 }
 

@@ -1,13 +1,17 @@
-import 'package:moviles/models/sucursal.dart';
+import 'sucursal.dart';
+
+import 'anexocredito.dart';
 
 class Credito {
   final int cred_id;
-  final String cred_fecha;
-  final int cred_monto;
+  final DateTime cred_fecha;
+  final double cred_monto;
   final String cred_plazo;
   final int cred_numero;
   bool cred_estado;
   final Sucursal sucursal;
+  final  AnexoCredito anexo_credito;
+
  
   Credito({
     required this.cred_id,
@@ -17,6 +21,8 @@ class Credito {
     required this.cred_numero,
     required this.cred_estado,
     required this.sucursal,
+    
+    required this.anexo_credito,
 
   });
 
@@ -29,6 +35,8 @@ class Credito {
       cred_numero: json['cred_numero'],
       cred_estado: json['cred_estado'],
       sucursal: Sucursal.fromJson(json['sucursal']),
+      
+      anexo_credito: AnexoCredito.fromJson(json['anexo_credito']),
     );
   }
   void toggle() {

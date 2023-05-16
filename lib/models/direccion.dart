@@ -12,7 +12,7 @@ class Direccion {
   bool dire_estado;
   final Sucursal sucursal;
   final Provincia provincia;
-  final Empleo empleo;
+  
   
 
   Direccion({
@@ -24,7 +24,7 @@ class Direccion {
     this.dire_estado = false,
     required this.sucursal,
     required this.provincia,
-    required this.empleo,
+   
   });
 
  factory Direccion.fromJson(Map<String, dynamic> json) {
@@ -37,7 +37,7 @@ class Direccion {
       dire_estado: json['dire_estado'],
       sucursal: Sucursal.fromJson(json['sucursal']),
       provincia: Provincia.fromJson(json['provincia']),
-      empleo: Empleo.fromJson(json['empleo']),
+      
     );
   }
   void toggle() {
