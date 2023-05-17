@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:moviles/models/usuario.dart';
 import 'package:moviles/src/pages/DetallePage.dart';
 import 'package:moviles/src/pages/login_page.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import '../../models/solicitud.dart';
 
 class NextPage1 extends StatefulWidget {
   final Usuario usuario;
@@ -15,11 +19,11 @@ class _NextPageState1 extends State<NextPage1>
     with SingleTickerProviderStateMixin {
       late Usuario usuario;
 
-  final List<Solicitud> solicitudes = [
+  /*final List<Solicitud> solicitudes = [
     Solicitud(fecha: '02/05/2023', monto: 200.0, estado: 'Aprobado'),
     Solicitud(fecha: '01/05/2023', monto: 150.0, estado: 'Rechazado'),
     Solicitud(fecha: '29/04/2023', monto: 100.0, estado: 'Pendiente'),
-  ];
+  ];*/
   @override
   void initState() {
     usuario = widget.usuario;
@@ -74,7 +78,7 @@ class _NextPageState1 extends State<NextPage1>
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      /*body: SingleChildScrollView(
         child: DataTable(
           columns: [
             DataColumn(label: Text('Fecha')),
@@ -91,15 +95,50 @@ class _NextPageState1 extends State<NextPage1>
                   ))
               .toList(),
         ),
-      ),
+      ),*/
     );
+  }
+  Future<void> listarSolicitudesUsername1(String username) async {
+    try {
+      String url =
+          "http://localhost:8080/api/solicitud/listarSolicitudesUsername/$username";
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        Solicitud solicitud = Solicitud.fromJson(jsonResponse);
+        solicitud.credito.cred_estado;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuario o contraseña inválido')),
+        );
+      }
+    } catch (error) {}
+  }
+  Future<List<Solicitud>> listarSolicitudesUsername(String username) async {
+    try {
+      String url =
+          "http://localhost:8080/api/solicitud/listarSolicitudesUsername/$username";
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        List<Solicitud> solicitudes = [];
+        for (var item in jsonResponse) {
+          solicitudes.add(Solicitud.fromJson(item));
+        }
+        return solicitudes;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      return [];
+    }
   }
 }
 
-class Solicitud {
+/*class Solicitud {
   final String fecha;
   final double monto;
   final String estado;
 
   Solicitud({required this.fecha, required this.monto, required this.estado});
-}
+}*/

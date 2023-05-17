@@ -4,7 +4,7 @@ import 'anexocredito.dart';
 
 class Credito {
   final int cred_id;
-  final DateTime cred_fecha;
+  final String cred_fecha;
   final double cred_monto;
   final String cred_plazo;
   final int cred_numero;

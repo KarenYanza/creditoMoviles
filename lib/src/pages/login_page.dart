@@ -9,7 +9,6 @@ import 'NavigationBar.dart';
 import 'NavigationBar1.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   static String id = 'login_page';
@@ -148,10 +147,10 @@ class _LoginPageState extends State<LoginPage> {
           "http://localhost:8080/api/usuarios/login/$username/$password";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
+        print("Ingreso");
         // El servidor devolvió una respuesta exitosa
         final jsonResponse = json.decode(response.body);
         Usuario u = Usuario.fromJson(jsonResponse);
-
         if (u.rol.rol_id == 3) {
           //Administrador
           Navigator.push(context,
@@ -160,9 +159,18 @@ class _LoginPageState extends State<LoginPage> {
           //Cliente
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => NextPage1(usuario: u)));
+        } else if (u.rol.rol_id == 2 || u.rol.rol_id == 1) {
+          print('Usted no puede ingresar al aplicativo movil solo web ');
+          _userController.clear();
+          _passwordController.clear();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    'Usted no puede ingresar al aplicativo movil solo web ')),
+          );
         }
       } else {
-        // El servidor devolvió un error
+        print('Usuario o contraseña inválido');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Usuario o contraseña inválido')),
         );

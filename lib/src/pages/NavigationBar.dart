@@ -26,19 +26,32 @@ class _NextPageState extends State<NextPage>
     Tab(text: 'Rechazados'),
   ];
 
+  // Agrega una variable para almacenar el estado seleccionado
+  String _selectedEstado = 'Todos';
+/*class _NextPageState extends State<NextPage>
+    with SingleTickerProviderStateMixin {
+  late Usuario usuario;
+  late TabController _tabController;
+  List<Tab> _tabs = [
+    Tab(text: 'Todos'),
+    Tab(text: 'Pendientes'),
+    Tab(text: 'Aprobados'),
+    Tab(text: 'Rechazados'),
+  ];
+
   static List<Factura> _data = [
     Factura(
         id: 1, nombre: 'Karen Yanzaguano', fecha: '01/01/2022', monto: 100.0),
     Factura(
         id: 2, nombre: 'Anthony Morocho', fecha: '02/01/2022', monto: 200.0),
     Factura(id: 3, nombre: 'Laura Zambrano', fecha: '03/01/2022', monto: 300.0),
-  ];
+  ];*/
   @override
   void initState() {
     usuario = widget.usuario;
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    print(usuario.usua_pregunta_dos);
+    print(usuario.usua_preguntaDos);
   }
 
   @override
@@ -106,73 +119,146 @@ class _NextPageState extends State<NextPage>
   }
 
   Widget _buildTodosScreen() {
-    return ListView.builder(
-      itemCount: _data.length,
-      itemBuilder: (context, index) {
-        final item = _data[index];
-        return InkWell(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => DetallePage(
-                  id: item.id,
-                  nombre: item.nombre,
-                  fecha: item.fecha,
-                  monto: item.monto,
+    return FutureBuilder<List<Solicitud>>(
+      future: listarSolicitudesEstado('Todos'),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<Solicitud> solicitudes = snapshot.data!;
+          print(solicitudes);
+          return ListView.builder(
+            itemCount: solicitudes.length,
+            itemBuilder: (context, index) {
+              final solicitud = solicitudes[index];
+              return InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => DetallePage(
+                        id: solicitud.soli_id,
+                        nombre: solicitud.persona.pers_nombres +
+                            solicitud.persona.pers_apellidos,
+                        fecha: solicitud.credito.cred_fecha,
+                        monto: solicitud.credito.cred_monto,
+                      ),
+                    ),
+                  );
+                },
+                child: ListTile(
+                  title: Text(solicitud.persona.pers_nombres),
+                  subtitle: Text(
+                      'Fecha: ${solicitud.credito.cred_fecha} - Monto: ${solicitud.credito.cred_monto}'),
                 ),
-              ),
-            );
-          },
-          child: ListTile(
-            title: Text(item.nombre),
-            subtitle: Text('Fecha: ${item.fecha} - Monto: ${item.monto}'),
-          ),
-        );
+              );
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error al cargar las solicitudes');
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
       },
     );
   }
 
   Widget _buildPendientesScreen() {
-    // código para construir la pantalla de datos pendientes
-    return Center(
-      child: Text('Pantalla de datos pendientes'),
+    return FutureBuilder<List<Solicitud>>(
+      future: listarSolicitudesEstado('Pendientes'),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<Solicitud> solicitudes = snapshot.data!;
+          // Construye la pantalla utilizando las solicitudes pendientes
+          // ...
+          return ListView.builder(
+            itemCount: solicitudes.length,
+            itemBuilder: (context, index) {
+              Solicitud solicitud = solicitudes[index];
+              return ListTile(
+                title: Text(solicitud.credito.cred_fecha),
+                subtitle: Text(solicitud.credito.cred_plazo),
+              );
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error al cargar las solicitudes pendientes');
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 
   Widget _buildAprobadosScreen() {
-    // código para construir la pantalla de datos aprobados
-    return Center(
-      child: Text('Pantalla de datos aprobados'),
+    return FutureBuilder<List<Solicitud>>(
+      future: listarSolicitudesEstado('Aprobados'),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<Solicitud> solicitudes = snapshot.data!;
+          // Construir la pantalla utilizando las solicitudes aprobadas
+          return ListView.builder(
+            itemCount: solicitudes.length,
+            itemBuilder: (context, index) {
+              Solicitud solicitud = solicitudes[index];
+              return ListTile(
+                title: Text(solicitud.credito.cred_fecha),
+                subtitle: Text(solicitud.credito.cred_plazo),
+              );
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error al cargar las solicitudes aprobadas');
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 
   Widget _buildRechazadosScreen() {
-    // código para construir la pantalla de datos rechazados
-    return Center(
-      child: Text('Pantalla de datos rechazados'),
+    return FutureBuilder<List<Solicitud>>(
+      future: listarSolicitudesEstado('Rechazados'),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<Solicitud> solicitudes = snapshot.data!;
+          // Construir la pantalla utilizando las solicitudes rechazadas
+          return ListView.builder(
+            itemCount: solicitudes.length,
+            itemBuilder: (context, index) {
+              Solicitud solicitud = solicitudes[index];
+              return ListTile(
+                title: Text(solicitud.credito.cred_fecha),
+                subtitle: Text(solicitud.credito.cred_plazo),
+              );
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error al cargar las solicitudes rechazadas');
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
-}
 
-Future<List<Solicitud>> listarSolicitudesEstado() async {
-  try {
-    String url = "http://localhost:8080/api/usuarios/listarSoliEstado";
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      List<Solicitud> solicitudes = [];
-      for (var item in jsonResponse) {
-        solicitudes.add(Solicitud.fromJson(item));
+  Future<List<Solicitud>> listarSolicitudesEstado(String estado) async {
+    try {
+      String url =
+          "http://localhost:8080/api/solicitud/listarSoliEstado";
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        List<Solicitud> solicitudes = [];
+        for (var item in jsonResponse) {
+          solicitudes.add(Solicitud.fromJson(item));
+        }
+        return solicitudes;
+      } else {
+        return [];
       }
-      return solicitudes;
-    } else {
+    } catch (error) {
       return [];
     }
-  } catch (error) {
-    return [];
   }
-}
-
+/*
 class Factura {
   final int id;
   final String nombre;
@@ -185,4 +271,5 @@ class Factura {
     required this.fecha,
     required this.monto,
   });
+}*/
 }
