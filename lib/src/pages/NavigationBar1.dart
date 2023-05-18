@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:moviles/models/usuario.dart';
-import 'package:moviles/src/pages/DetallePage.dart';
-import 'package:moviles/src/pages/login_page.dart';
 import 'package:http/http.dart' as http;
+import 'package:moviles/src/pages/login_page.dart';
 import 'dart:convert';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../models/solicitud.dart';
+import '../../models/usuario.dart';
 
 class NextPage1 extends StatefulWidget {
   final Usuario usuario;
@@ -21,16 +19,12 @@ class _NextPageState1 extends State<NextPage1>
   late Usuario usuario;
   List<Solicitud> _solicitudes = [];
 
-  /*final List<Solicitud> solicitudes = [
-    Solicitud(fecha: '02/05/2023', monto: 200.0, estado: 'Aprobado'),
-    Solicitud(fecha: '01/05/2023', monto: 150.0, estado: 'Rechazado'),
-    Solicitud(fecha: '29/04/2023', monto: 100.0, estado: 'Pendiente'),
-  ];*/
   @override
   void initState() {
     usuario = widget.usuario;
     listarSolicitudesUsername(usuario.usua_username);
     super.initState();
+    print(" IMAGEN " + usuario.persona.pers_foto);
   }
 
   @override
@@ -38,7 +32,8 @@ class _NextPageState1 extends State<NextPage1>
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            'Bienvenido ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}  '),
+          'Bienvenido ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}',
+        ),
         automaticallyImplyLeading: false,
         actions: [
           GestureDetector(
@@ -70,60 +65,47 @@ class _NextPageState1 extends State<NextPage1>
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
-                // backgroundImage: AssetImage('images/logo.png'),
-
-                //backgroundImage: Image.network(
-                  //'https://estaticos-cdn.sport.es/clip/ca7f0dcb-54dc-4929-9cf4-b085528d8219_media-libre-aspect-ratio_default_0.jpg',
-                  //usuario.persona.pers_foto+"",
-               // ).image,
+                backgroundImage:
+                    imageFromBase64String(usuario.persona.pers_foto),
               ),
             ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-  child: DataTable(
-    columns: [
-      DataColumn(label: Text('Fecha')),
-      DataColumn(label: Text('Monto')),
-      DataColumn(label: Text('Estado')),
-    ],
-    rows: _solicitudes
-        .map((solicitud) => DataRow(
-              cells: [
-                DataCell(Text(solicitud.credito.cred_fecha)),
-                DataCell(Text(solicitud.credito.cred_fecha.toString())),
-                DataCell(Text(solicitud.soli_estado)),
-              ],
-            ))
-        .toList(),
-  ),
-),
-      /*body: SingleChildScrollView(
         child: DataTable(
           columns: [
             DataColumn(label: Text('Fecha')),
             DataColumn(label: Text('Monto')),
             DataColumn(label: Text('Estado')),
           ],
-          rows: solicitudes
-              .map((solicitud) => DataRow(
-                    cells: [
-                      DataCell(Text(solicitud.fecha)),
-                      DataCell(Text(solicitud.monto.toString())),
-                      DataCell(Text(solicitud.estado)),
-                    ],
-                  ))
+          rows: _solicitudes
+              .map(
+                (solicitud) => DataRow(
+                  cells: [
+                    DataCell(Text(solicitud.credito.cred_fecha)),
+                    DataCell(Text(solicitud.credito.cred_fecha.toString())),
+                    DataCell(Text(solicitud.soli_estado)),
+                  ],
+                ),
+              )
               .toList(),
         ),
-      ),*/
+      ),
     );
   }
-  Image imageFromBase64String(String base64String) {
-    return Image.memory(
-      base64Decode(base64String),
-      fit: BoxFit.fill,
-    );
+
+  ImageProvider imageFromBase64String(String base64String) {
+    print(base64String);
+    if (base64String != "") {
+      return MemoryImage(
+        base64Decode(base64String),
+      );
+    } else {
+      return AssetImage(
+        'images/logo.png',
+      );
+    }
   }
 
   Future<void> listarSolicitudesUsername1(String username) async {
@@ -163,11 +145,3 @@ class _NextPageState1 extends State<NextPage1>
     }
   }
 }
-
-/*class Solicitud {
-  final String fecha;
-  final double monto;
-  final String estado;
-
-  Solicitud({required this.fecha, required this.monto, required this.estado});
-}*/

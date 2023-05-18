@@ -160,7 +160,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       String username, String preguntaUno, String preguntaDos) async {
     try {
       String url =
-          "http://localhost:8080/api/usuarios/restablecer/$username/$preguntaUno/$preguntaDos";
+          "http://localhost:8080/api/usuarios/restablecerC/$username/$preguntaUno/$preguntaDos";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -180,9 +180,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                       u.persona.pers_correo)),
             );
           });
-        } else{
-          
-        }
+        } else {}
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Usuario inválido')),
@@ -193,11 +191,11 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Respuestas incorrectas.')),
         );
-            _showVerification = false;
-            _verificationController.clear();
-            _verification1Controller.clear();
-            _userFound = false;
-          });
+        _showVerification = false;
+        _verificationController.clear();
+        _verification1Controller.clear();
+        _userFound = false;
+      });
     }
   }
 }
