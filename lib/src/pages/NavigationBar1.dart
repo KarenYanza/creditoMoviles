@@ -26,7 +26,6 @@ class _NextPageState1 extends State<NextPage1>
     usuario = widget.usuario;
     listarSolicitudesUsername(usuario.usua_username);
     super.initState();
-    print(" IMAGEN " + usuario.persona.pers_foto);
   }
 
   @override
@@ -66,11 +65,7 @@ class _NextPageState1 extends State<NextPage1>
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Base64ImageWidget(usuario.persona.pers_foto),
-              /*child: CircleAvatar(
-                backgroundImage:
-                    imageFromBase64String(usuario.persona.pers_foto),
-              ),*/
+              child: CircularImageWidget(usuario.persona.pers_foto),
             ),
           ),
         ],
@@ -96,18 +91,6 @@ class _NextPageState1 extends State<NextPage1>
         ),
       ),
     );
-  }
-
-  ImageProvider<Object>? imageFromBase64String(String base64String) {
-    if (base64String != null && base64String.isNotEmpty) {
-      return MemoryImage(
-        base64Decode(base64String),
-      );
-    } else {
-      return AssetImage(
-        'images/logo.png',
-      );
-    }
   }
 
   Future<void> listarSolicitudesUsername1(String username) async {
@@ -148,15 +131,21 @@ class _NextPageState1 extends State<NextPage1>
   }
 }
 
-class Base64ImageWidget extends StatelessWidget {
+class CircularImageWidget extends StatelessWidget {
   final String base64Image;
 
-  Base64ImageWidget(this.base64Image);
+  CircularImageWidget(this.base64Image);
 
   @override
   Widget build(BuildContext context) {
     String base64ImageWithoutHeader = base64Image.split(',').last;
     Uint8List bytes = base64.decode(base64ImageWithoutHeader);
-    return Image.memory(bytes);
+
+    return ClipOval(
+      child: Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+      ),
+    );
   }
 }

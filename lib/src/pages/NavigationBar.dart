@@ -101,11 +101,7 @@ class _NextPageState extends State<NextPage>
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                backgroundImage:
-                    imageFromBase64String(usuario.persona.pers_foto),
-              ),
-              
+              child: CircularImageWidget(usuario.persona.pers_foto),
             ),
           ),
         ],
@@ -243,21 +239,19 @@ class _NextPageState extends State<NextPage>
     );
   }
 
-MemoryImage? imageFromBase64String(String base64String) {
-  try {
-    Uint8List bytes = base64Decode(base64String);
-    img.Image originalImage = img.decodeImage(bytes)!;
-    img.Image resizedImage =
-        img.copyResize(originalImage, width: 200, height: 200);
-    Uint8List resizedBytes = img.encodePng(resizedImage) as Uint8List;
-    return MemoryImage(resizedBytes);
-  } catch (error) {
-    print('Error al cargar la imagen: $error');
-    return null;
+  MemoryImage? imageFromBase64String(String base64String) {
+    try {
+      Uint8List bytes = base64Decode(base64String);
+      img.Image originalImage = img.decodeImage(bytes)!;
+      img.Image resizedImage =
+          img.copyResize(originalImage, width: 200, height: 200);
+      Uint8List resizedBytes = img.encodePng(resizedImage) as Uint8List;
+      return MemoryImage(resizedBytes);
+    } catch (error) {
+      print('Error al cargar la imagen: $error');
+      return null;
+    }
   }
-}
-
-
 
   Future<List<Solicitud>> listarSolicitudesEstado(String estado) async {
     try {
@@ -291,4 +285,23 @@ class Factura {
     required this.monto,
   });
 }*/
+}
+
+class CircularImageWidget extends StatelessWidget {
+  final String base64Image;
+
+  CircularImageWidget(this.base64Image);
+
+  @override
+  Widget build(BuildContext context) {
+    String base64ImageWithoutHeader = base64Image.split(',').last;
+    Uint8List bytes = base64.decode(base64ImageWithoutHeader);
+
+    return ClipOval(
+      child: Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
 }
