@@ -12,6 +12,7 @@ import 'dart:async';
 
 class LoginPage extends StatefulWidget {
   static String id = 'login_page';
+
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -26,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
+    /*if (_loading) {
       return Center(
         child: Stack(
           children: [
@@ -37,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
       );
-    }
+    }*/
     return SafeArea(
       child: Scaffold(
         body: Center(
@@ -130,7 +131,6 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () {
         if (_formKey.currentState!.validate()) {
           bool userFound = false;
-
           login(_userController.text, _passwordController.text);
         }
       },
@@ -153,29 +153,29 @@ class _LoginPageState extends State<LoginPage> {
         Usuario u = Usuario.fromJson(jsonResponse);
         if (u.rol.rol_id == 3) {
           //Administrador
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => NextPage(usuario: u)));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NextPage(usuario: u)),
+          );
         } else if (u.rol.rol_id == 4) {
           //Cliente
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => NextPage1(usuario: u)));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NextPage1(usuario: u)),
+          );
         } else if (u.rol.rol_id == 2 || u.rol.rol_id == 1) {
-          print('Usted no puede ingresar al aplicativo movil solo web ');
+          showErrorMessage(
+              'Usted no puede ingresar al aplicativo móvil, solo web');
           _userController.clear();
           _passwordController.clear();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    'Usted no puede ingresar al aplicativo movil solo web ')),
-          );
         }
       } else {
-        print('Usuario o contraseña inválido');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuario o contraseña inválido')),
-        );
+        showErrorMessage('Usuario no existe');
       }
     } catch (error) {
+      showErrorMessage('Usuario o contraseña inválida');
+      _userController.clear();
+      _passwordController.clear();
     } finally {
       if (mounted) {
         setState(() {
@@ -183,6 +183,14 @@ class _LoginPageState extends State<LoginPage> {
         });
       }
     }
+  }
+
+  void showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
   }
 
   Widget _buildRegisterButton() {
@@ -195,3 +203,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+

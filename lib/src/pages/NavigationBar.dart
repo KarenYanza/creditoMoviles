@@ -1,11 +1,18 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:moviles/models/usuario.dart';
 import 'package:moviles/src/pages/DetallePage.dart';
 import 'package:moviles/src/pages/login_page.dart';
 import 'package:http/http.dart' as http;
 import '../../models/solicitud.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image/image.dart' as img;
+import 'package:flutter/rendering.dart' as rendering;
+import 'dart:ui' as ui;
 
 class NextPage extends StatefulWidget {
   final Usuario usuario;
@@ -95,13 +102,10 @@ class _NextPageState extends State<NextPage>
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
-                // backgroundImage: AssetImage('images/logo.png'),
-
-                backgroundImage: Image.network(
-                  //'https://estaticos-cdn.sport.es/clip/ca7f0dcb-54dc-4929-9cf4-b085528d8219_media-libre-aspect-ratio_default_0.jpg',
-                  usuario.persona.pers_foto,
-                ).image,
+                backgroundImage:
+                    imageFromBase64String(usuario.persona.pers_foto),
               ),
+              
             ),
           ),
         ],
@@ -239,10 +243,25 @@ class _NextPageState extends State<NextPage>
     );
   }
 
+MemoryImage? imageFromBase64String(String base64String) {
+  try {
+    Uint8List bytes = base64Decode(base64String);
+    img.Image originalImage = img.decodeImage(bytes)!;
+    img.Image resizedImage =
+        img.copyResize(originalImage, width: 200, height: 200);
+    Uint8List resizedBytes = img.encodePng(resizedImage) as Uint8List;
+    return MemoryImage(resizedBytes);
+  } catch (error) {
+    print('Error al cargar la imagen: $error');
+    return null;
+  }
+}
+
+
+
   Future<List<Solicitud>> listarSolicitudesEstado(String estado) async {
     try {
-      String url =
-          "http://localhost:8080/api/solicitud/listarSoliEstado";
+      String url = "http://localhost:8080/api/solicitud/listarSoliEstado";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);

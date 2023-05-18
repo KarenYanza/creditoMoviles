@@ -4,6 +4,7 @@ import 'package:moviles/src/pages/DetallePage.dart';
 import 'package:moviles/src/pages/login_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../models/solicitud.dart';
 
@@ -17,7 +18,8 @@ class NextPage1 extends StatefulWidget {
 
 class _NextPageState1 extends State<NextPage1>
     with SingleTickerProviderStateMixin {
-      late Usuario usuario;
+  late Usuario usuario;
+  List<Solicitud> _solicitudes = [];
 
   /*final List<Solicitud> solicitudes = [
     Solicitud(fecha: '02/05/2023', monto: 200.0, estado: 'Aprobado'),
@@ -27,6 +29,7 @@ class _NextPageState1 extends State<NextPage1>
   @override
   void initState() {
     usuario = widget.usuario;
+    listarSolicitudesUsername(usuario.usua_username);
     super.initState();
   }
 
@@ -69,15 +72,33 @@ class _NextPageState1 extends State<NextPage1>
               child: CircleAvatar(
                 // backgroundImage: AssetImage('images/logo.png'),
 
-                backgroundImage: Image.network(
+                //backgroundImage: Image.network(
                   //'https://estaticos-cdn.sport.es/clip/ca7f0dcb-54dc-4929-9cf4-b085528d8219_media-libre-aspect-ratio_default_0.jpg',
-                  usuario.persona.pers_foto,
-                ).image,
+                  //usuario.persona.pers_foto+"",
+               // ).image,
               ),
             ),
           ),
         ],
       ),
+      body: SingleChildScrollView(
+  child: DataTable(
+    columns: [
+      DataColumn(label: Text('Fecha')),
+      DataColumn(label: Text('Monto')),
+      DataColumn(label: Text('Estado')),
+    ],
+    rows: _solicitudes
+        .map((solicitud) => DataRow(
+              cells: [
+                DataCell(Text(solicitud.credito.cred_fecha)),
+                DataCell(Text(solicitud.credito.cred_fecha.toString())),
+                DataCell(Text(solicitud.soli_estado)),
+              ],
+            ))
+        .toList(),
+  ),
+),
       /*body: SingleChildScrollView(
         child: DataTable(
           columns: [
@@ -98,6 +119,13 @@ class _NextPageState1 extends State<NextPage1>
       ),*/
     );
   }
+  Image imageFromBase64String(String base64String) {
+    return Image.memory(
+      base64Decode(base64String),
+      fit: BoxFit.fill,
+    );
+  }
+
   Future<void> listarSolicitudesUsername1(String username) async {
     try {
       String url =
@@ -114,6 +142,7 @@ class _NextPageState1 extends State<NextPage1>
       }
     } catch (error) {}
   }
+
   Future<List<Solicitud>> listarSolicitudesUsername(String username) async {
     try {
       String url =
@@ -121,11 +150,11 @@ class _NextPageState1 extends State<NextPage1>
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        List<Solicitud> solicitudes = [];
+        _solicitudes = [];
         for (var item in jsonResponse) {
-          solicitudes.add(Solicitud.fromJson(item));
+          _solicitudes.add(Solicitud.fromJson(item));
         }
-        return solicitudes;
+        return _solicitudes;
       } else {
         return [];
       }
