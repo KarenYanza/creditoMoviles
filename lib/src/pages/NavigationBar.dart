@@ -131,17 +131,19 @@ class _NextPageState extends State<NextPage>
               final solicitud = solicitudes[index];
               return InkWell(
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => DetallePage(
-                        id: solicitud.soli_id,
-                        nombre: solicitud.persona.pers_nombres +
-                            solicitud.persona.pers_apellidos,
-                        fecha: solicitud.credito.cred_fecha,
-                        monto: solicitud.credito.cred_monto,
+                  if (solicitud.soli_estado == "En proceso") {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => DetallePage(
+                          id: solicitud.soli_id,
+                          nombre: solicitud.persona.pers_nombres +
+                              solicitud.persona.pers_apellidos,
+                          fecha: solicitud.credito.cred_fecha,
+                          monto: solicitud.credito.cred_monto,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
                 child: ListTile(
                   title: Text(solicitud.persona.pers_nombres),
