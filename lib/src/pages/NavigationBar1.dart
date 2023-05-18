@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:moviles/src/pages/login_page.dart';
@@ -64,10 +66,11 @@ class _NextPageState1 extends State<NextPage1>
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: CircleAvatar(
+              child: Base64ImageWidget(usuario.persona.pers_foto),
+              /*child: CircleAvatar(
                 backgroundImage:
                     imageFromBase64String(usuario.persona.pers_foto),
-              ),
+              ),*/
             ),
           ),
         ],
@@ -95,9 +98,8 @@ class _NextPageState1 extends State<NextPage1>
     );
   }
 
-  ImageProvider imageFromBase64String(String base64String) {
-    print(base64String);
-    if (base64String != "") {
+  ImageProvider<Object>? imageFromBase64String(String base64String) {
+    if (base64String != null && base64String.isNotEmpty) {
       return MemoryImage(
         base64Decode(base64String),
       );
@@ -143,5 +145,18 @@ class _NextPageState1 extends State<NextPage1>
     } catch (error) {
       return [];
     }
+  }
+}
+
+class Base64ImageWidget extends StatelessWidget {
+  final String base64Image;
+
+  Base64ImageWidget(this.base64Image);
+
+  @override
+  Widget build(BuildContext context) {
+    String base64ImageWithoutHeader = base64Image.split(',').last;
+    Uint8List bytes = base64.decode(base64ImageWithoutHeader);
+    return Image.memory(bytes);
   }
 }
