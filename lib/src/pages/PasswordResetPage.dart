@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:moviles/src/pages/login_page.dart';
@@ -21,6 +23,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   bool _showVerification = false;
   String _securityQuestion = "";
   bool _userFound = false;
+  String logoImage = 'images/logo.png';
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +39,14 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.asset(
-                    'images/logo.png',
-                    height: 100.0,
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: ConditionalCircularImageWidget(
+                      base64Image: logoImage,
+                      fallbackImage: 'images/logo.png',
+                      width: 100.0,
+                      height: 100.0,
+                    ),
                   ),
                   SizedBox(width: 16.0),
                   Text(
@@ -76,7 +84,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                     Column(
                       children: [
                         Text(
-                          "¿Cuál es el nombre de tu primera mascota?",
+                          "¿Cuál es tu color favorito?",
                           style: TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,
@@ -88,7 +96,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                         ),
                         SizedBox(height: 10.0),
                         Text(
-                          "¿Cuál es tu color favorito?",
+                          "¿Cuál es el nombre de tu primera mascota? ",
                           style: TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,
@@ -131,6 +139,9 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
           setState(() {
             _showVerification = true;
             _userFound = true;
+            if (u.persona.pers_foto != null || u.persona.pers_foto.isEmpty) {
+              logoImage = u.persona.pers_foto;
+            }
           });
         } else if (u.rol.rol_id == 1 ||
             u.rol.rol_id == 2 ||
@@ -138,7 +149,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content: Text(
-                    'Usted es empleado porfavor contactarse con servicio tecnico para restablecimiento de su contraseña ')),
+                    'Usted es empleado por favor contactarse con servicio técnico para restablecimiento de su contraseña')),
           );
           Navigator.of(context).pushNamed(LoginPage.id);
         }
@@ -165,9 +176,12 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         Usuario u = Usuario.fromJson(jsonResponse);
-        if (_usernameController.text == u.usua_username &&
-            _verificationController.text == u.usua_preguntaUno &&
-            _verification1Controller.text == u.usua_preguntaDos) {
+        if (_usernameController.text.toLowerCase() ==
+                u.usua_username.toLowerCase() &&
+            _verificationController.text.toLowerCase() ==
+                u.usua_preguntaUno.toLowerCase() &&
+            _verification1Controller.text.toLowerCase() ==
+                u.usua_preguntaDos.toLowerCase()) {
           setState(() {
             _showVerification = false;
             _usernameController.clear();
@@ -196,6 +210,57 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         _verification1Controller.clear();
         _userFound = false;
       });
+    }
+  }
+}
+
+class ConditionalCircularImageWidget extends StatelessWidget {
+  final String base64Image;
+  final String fallbackImage;
+  final double width;
+  final double height;
+
+  ConditionalCircularImageWidget({
+    required this.base64Image,
+    required this.fallbackImage,
+    this.width = 100.0,
+    this.height = 100.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (base64Image == null || base64Image.isEmpty) {
+      return ClipOval(
+        child: Image.asset(
+          fallbackImage,
+          fit: BoxFit.cover,
+          width: width,
+          height: height,
+        ),
+      );
+    } else {
+      try {
+        String base64ImageWithoutHeader = base64Image.split(',').last;
+        Uint8List bytes = base64.decode(base64ImageWithoutHeader);
+        return ClipOval(
+          child: Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            width: width,
+            height: height,
+          ),
+        );
+      } catch (error) {
+        print('Error decoding base64 image: $error');
+        return ClipOval(
+          child: Image.asset(
+            fallbackImage,
+            fit: BoxFit.cover,
+            width: width,
+            height: height,
+          ),
+        );
+      }
     }
   }
 }

@@ -63,9 +63,16 @@ class _NextPageState1 extends State<NextPage1>
                 },
               );
             },
-            child: Padding(
+            /*child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircularImageWidget(usuario.persona.pers_foto),
+            ),*/
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ConditionalCircularImageWidget(
+                base64Image: usuario.persona.pers_foto,
+                fallbackImage: 'images/logo.png',
+              ),
             ),
           ),
         ],
@@ -131,21 +138,31 @@ class _NextPageState1 extends State<NextPage1>
   }
 }
 
-class CircularImageWidget extends StatelessWidget {
+class ConditionalCircularImageWidget extends StatelessWidget {
   final String base64Image;
+  final String fallbackImage;
 
-  CircularImageWidget(this.base64Image);
+  ConditionalCircularImageWidget(
+      {required this.base64Image, required this.fallbackImage});
 
   @override
   Widget build(BuildContext context) {
-    String base64ImageWithoutHeader = base64Image.split(',').last;
-    Uint8List bytes = base64.decode(base64ImageWithoutHeader);
-
-    return ClipOval(
-      child: Image.memory(
-        bytes,
-        fit: BoxFit.cover,
-      ),
-    );
+    if (base64Image == null || base64Image.isEmpty) {
+      return ClipOval(
+        child: Image.asset(
+          fallbackImage,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else {
+      String base64ImageWithoutHeader = base64Image.split(',').last;
+      Uint8List bytes = base64.decode(base64ImageWithoutHeader);
+      return ClipOval(
+        child: Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
   }
 }
