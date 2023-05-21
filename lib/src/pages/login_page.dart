@@ -13,7 +13,6 @@ import 'NavigationBar.dart';
 import 'NavigationBar1.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'package:local_ip/local_ip.dart';
 
 class LoginPage extends StatefulWidget {
   static String id = 'login_page';
