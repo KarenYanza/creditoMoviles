@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -24,6 +25,8 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
   bool _obscureText = true;
+  String logoImage = 'images/logo.png';
+  int failedAttempts = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +51,14 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'images/logo.png',
-                    height: 300.0,
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: ConditionalCircularImageWidget(
+                      base64Image: logoImage,
+                      fallbackImage: 'images/logo.png',
+                      width: 300.0,
+                      height: 300.0,
+                    ),
                   ),
                   SizedBox(
                     height: 15.0,
@@ -131,57 +139,75 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () {
         if (_formKey.currentState!.validate()) {
           bool userFound = false;
-          login(_userController.text, _passwordController.text);
+          obtenerUsuarioYLogin(_userController.text, _passwordController.text);
         }
       },
       child: Text('Iniciar sesión'),
     );
   }
 
-  Future<void> login(String username, String password) async {
-    setState(() {
-      _loading = true;
-    });
+  Future<void> obtenerUsuarioYLogin(String username, String password) async {
     try {
-      String url =
-          "http://localhost:8080/api/usuarios/login/$username/$password";
+      String url = "http://localhost:8080/api/usuarios/search/$username";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        print("Ingreso");
-        // El servidor devolvió una respuesta exitosa
         final jsonResponse = json.decode(response.body);
         Usuario u = Usuario.fromJson(jsonResponse);
-        if (u.rol.rol_id == 3) {
-          //Administrador
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => NextPage(usuario: u)),
-          );
-        } else if (u.rol.rol_id == 4) {
-          //Cliente
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => NextPage1(usuario: u)),
-          );
-        } else if (u.rol.rol_id == 2 || u.rol.rol_id == 1) {
-          showErrorMessage(
-              'Usted no puede ingresar al aplicativo móvil, solo web');
-          _userController.clear();
-          _passwordController.clear();
+        if (u.usua_password == password) {
+          // Usuario y contraseña coinciden
+          if (u.rol.rol_id == 3) {
+            // Administrador
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NextPage(usuario: u)),
+            );
+          } else if (u.rol.rol_id == 4) {
+            // Cliente
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NextPage1(usuario: u)),
+            );
+          } else if (u.rol.rol_id == 2 || u.rol.rol_id == 1) {
+            showErrorMessage(
+                'Su rol no tiene permiso para iniciar sesión en la aplicación móvil.');
+            _userController.clear();
+            _passwordController.clear();
+            setState(() {
+              logoImage = 'images/logo.png';
+            });
+          }
+        } else {
+          failedAttempts++; // Incrementar el contador de intentos fallidos
+
+          if (failedAttempts >= 3) {
+            showErrorMessage(
+                'Has excedido el número máximo de intentos fallidos');
+            _userController.clear();
+            _passwordController.clear();
+            setState(() {
+              logoImage = 'images/logo.png';
+            });
+          } else {
+            showErrorMessage('Contraseña incorrecta');
+            _passwordController.clear();
+            if (u.persona.pers_foto != null && u.persona.pers_foto.isNotEmpty) {
+              setState(() {
+                logoImage = u.persona.pers_foto;
+              });
+            } else {
+              setState(() {
+                logoImage = 'images/logo.png';
+              });
+            }
+          }
         }
       } else {
         showErrorMessage('Usuario no existe');
       }
     } catch (error) {
-      showErrorMessage('Usuario o contraseña inválida');
+      showErrorMessage('Usuario inválido');
       _userController.clear();
       _passwordController.clear();
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
     }
   }
 
@@ -204,3 +230,53 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+class ConditionalCircularImageWidget extends StatelessWidget {
+  final String base64Image;
+  final String fallbackImage;
+  final double width;
+  final double height;
+
+  ConditionalCircularImageWidget({
+    required this.base64Image,
+    required this.fallbackImage,
+    this.width = 300.0,
+    this.height = 300.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (base64Image == null || base64Image.isEmpty) {
+      return ClipOval(
+        child: Image.asset(
+          fallbackImage,
+          fit: BoxFit.cover,
+          width: width,
+          height: height,
+        ),
+      );
+    } else {
+      try {
+        String base64ImageWithoutHeader = base64Image.split(',').last;
+        Uint8List bytes = base64.decode(base64ImageWithoutHeader);
+        return ClipOval(
+          child: Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            width: width,
+            height: height,
+          ),
+        );
+      } catch (error) {
+        print('Error decoding base64 image: $error');
+        return ClipOval(
+          child: Image.asset(
+            fallbackImage,
+            fit: BoxFit.cover,
+            width: width,
+            height: height,
+          ),
+        );
+      }
+    }
+  }
+}
