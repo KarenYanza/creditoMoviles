@@ -10,6 +10,7 @@ import 'NavigationBar.dart';
 import 'NavigationBar1.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
+import 'package:dio/dio.dart';
 
 class LoginPage extends StatefulWidget {
   static String id = 'login_page';
@@ -146,10 +147,26 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<String> getLocalIpAddress() async {
+    try {
+      final response = await http.get(Uri.parse('https://api.ipify.org'));
+      if (response.statusCode == 200) {
+        return response.body.trim();
+      }
+    } catch (error) {
+      print('Error obtaining local IP address: $error');
+    }
+    return '';
+  }
+
   Future<void> obtenerUsuarioYLogin(String username, String password) async {
     try {
-      String url = "http://localhost:8080/api/usuarios/search/$username";
-      final response = await http.get(Uri.parse(url));
+      String localIpAddress = await getLocalIpAddress();
+      String domain =
+          'http://$localIpAddress:8080/api/usuarios/search/$username';
+     // String url = "http://$localIpAddress:8080/api/usuarios/search/$username";
+      final response = await http.get(Uri.parse(domain));
+      //final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         Usuario u = Usuario.fromJson(jsonResponse);
