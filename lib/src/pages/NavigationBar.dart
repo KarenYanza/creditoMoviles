@@ -9,7 +9,6 @@ import 'package:moviles/src/pages/DetallePage.dart';
 import 'package:moviles/src/pages/login_page.dart';
 import 'package:http/http.dart' as http;
 import '../../models/solicitud.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/rendering.dart' as rendering;
 import 'dart:ui' as ui;

@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intranet_ip/intranet_ip.dart';
 import 'package:lottie/lottie.dart';
 
 import 'package:moviles/models/usuario.dart';
@@ -10,7 +13,7 @@ import 'NavigationBar.dart';
 import 'NavigationBar1.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'package:dio/dio.dart';
+import 'package:local_ip/local_ip.dart';
 
 class LoginPage extends StatefulWidget {
   static String id = 'login_page';
@@ -147,78 +150,68 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<String> getLocalIpAddress() async {
-    try {
-      final response = await http.get(Uri.parse('https://api.ipify.org'));
-      if (response.statusCode == 200) {
-        return response.body.trim();
-      }
-    } catch (error) {
-      print('Error obtaining local IP address: $error');
-    }
-    return '';
-  }
-
   Future<void> obtenerUsuarioYLogin(String username, String password) async {
     try {
-      String localIpAddress = await getLocalIpAddress();
-      String domain =
-          'http://$localIpAddress:8080/api/usuarios/search/$username';
-     // String url = "http://$localIpAddress:8080/api/usuarios/search/$username";
-      final response = await http.get(Uri.parse(domain));
-      //final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        Usuario u = Usuario.fromJson(jsonResponse);
-        if (u.usua_password == password) {
-          // Usuario y contraseña coinciden
-          if (u.rol.rol_id == 3) {
-            // Administrador
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => NextPage(usuario: u)),
-            );
-          } else if (u.rol.rol_id == 4) {
-            // Cliente
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => NextPage1(usuario: u)),
-            );
-          } else if (u.rol.rol_id == 2 || u.rol.rol_id == 1) {
-            showErrorMessage(
-                'Su rol no tiene permiso para iniciar sesión en la aplicación móvil.');
-            _userController.clear();
-            _passwordController.clear();
-            setState(() {
-              logoImage = 'images/logo.png';
-            });
-          }
-        } else {
-          failedAttempts++; // Incrementar el contador de intentos fallidos
-
-          if (failedAttempts >= 3) {
-            showErrorMessage(
-                'Has excedido el número máximo de intentos fallidos');
-            _userController.clear();
-            _passwordController.clear();
-            setState(() {
-              logoImage = 'images/logo.png';
-            });
-          } else {
-            showErrorMessage('Contraseña incorrecta');
-            _passwordController.clear();
-            if (u.persona.pers_foto != null && u.persona.pers_foto.isNotEmpty) {
+      final ip = await intranetIpv4();
+      String localhost = ip.rawAddress as String;
+      if (localhost != null) {
+        String domain = 'http://$localhost:8080/api/usuarios/search/$username';
+        final response = await http.get(Uri.parse(domain));
+        if (response.statusCode == 200) {
+          final jsonResponse = json.decode(response.body);
+          Usuario u = Usuario.fromJson(jsonResponse);
+          if (u.usua_password == password) {
+            // Usuario y contraseña coinciden
+            if (u.rol.rol_id == 3) {
+              // Administrador
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NextPage(usuario: u)),
+              );
+            } else if (u.rol.rol_id == 4) {
+              // Cliente
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NextPage1(usuario: u)),
+              );
+            } else if (u.rol.rol_id == 2 || u.rol.rol_id == 1) {
+              showErrorMessage(
+                  'Su rol no tiene permiso para iniciar sesión en la aplicación móvil.');
+              _userController.clear();
+              _passwordController.clear();
               setState(() {
-                logoImage = u.persona.pers_foto;
+                logoImage = 'images/logo.png';
               });
             }
+          } else {
+            failedAttempts++; // Incrementar el contador de intentos fallidos
+
+            if (failedAttempts >= 3) {
+              showErrorMessage(
+                  'Has excedido el número máximo de intentos fallidos');
+              _userController.clear();
+              _passwordController.clear();
+              setState(() {
+                logoImage = 'images/logo.png';
+              });
+            } else {
+              showErrorMessage('Contraseña incorrecta');
+              _passwordController.clear();
+              if (u.persona.pers_foto.isNotEmpty) {
+                setState(() {
+                  logoImage = u.persona.pers_foto;
+                });
+              }
+            }
           }
+        } else {
+          showErrorMessage('Usuario no existe');
         }
       } else {
-        showErrorMessage('Usuario no existe');
+        showErrorMessage('No se pudo obtener la dirección IP');
       }
     } catch (error) {
-      showErrorMessage('Usuario inválido');
+      showErrorMessage('Error al obtener la dirección IP');
       _userController.clear();
       _passwordController.clear();
     }
@@ -258,7 +251,7 @@ class ConditionalCircularImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (base64Image == null || base64Image.isEmpty) {
+    if (base64Image.isEmpty) {
       return ClipOval(
         child: Image.asset(
           fallbackImage,
