@@ -194,10 +194,6 @@ class _LoginPageState extends State<LoginPage> {
               setState(() {
                 logoImage = u.persona.pers_foto;
               });
-            } else {
-              setState(() {
-                logoImage = 'images/logo.png';
-              });
             }
           }
         }
