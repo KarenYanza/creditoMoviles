@@ -171,7 +171,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       String username, String preguntaUno, String preguntaDos) async {
     try {
       String url =
-          "http://localhost:8080/api/usuarios/restablecerC/$username/$preguntaUno/$preguntaDos";
+          "http://localhost:192.168.0.106:8080/api/usuarios/restablecerC/$username/$preguntaUno/$preguntaDos";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
