@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intranet_ip/intranet_ip.dart';
 import 'package:lottie/lottie.dart';
+import 'package:moviles/Services/globals.dart';
 
 import 'package:moviles/models/usuario.dart';
 import 'package:moviles/src/pages/PasswordResetPage.dart';
@@ -151,8 +152,10 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> obtenerUsuarioYLogin(String username, String password) async {
     try {
-      String domain = 'http://192.168.0.106:8080/api/usuarios/search/$username';
-      final response = await http.get(Uri.parse(domain));
+      String url = '${APIConfig.baseURL}usuarios/search/$username';
+      final response = await http.get(Uri.parse(url));
+      //String domain = 'http://192.168.0.106:8080/api/usuarios/search/$username';
+      //final response = await http.get(Uri.parse(domain));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         Usuario u = Usuario.fromJson(jsonResponse);

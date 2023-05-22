@@ -1,2 +1,6 @@
-const String baseURL = "http://localhost:8080/api/";
-const Map<String, String> headers = {"Content-Type": "application/json"};
+class APIConfig {
+  static const String baseURL = "http://192.168.0.102:8080/api/";
+  static const Map<String, String> headers = {
+    "Content-Type": "application/json"
+  };
+}

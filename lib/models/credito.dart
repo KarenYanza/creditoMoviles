@@ -10,21 +10,15 @@ class Credito {
   final int cred_numero;
   bool cred_estado;
   final Sucursal sucursal;
-  final  AnexoCredito anexo_credito;
 
- 
-  Credito({
-    required this.cred_id,
-    required this.cred_fecha,
-    required this.cred_monto,
-    required this.cred_plazo,
-    required this.cred_numero,
-    required this.cred_estado,
-    required this.sucursal,
-    
-    required this.anexo_credito,
-
-  });
+  Credito(
+      {required this.cred_id,
+      required this.cred_fecha,
+      required this.cred_monto,
+      required this.cred_plazo,
+      required this.cred_numero,
+      required this.cred_estado,
+      required this.sucursal});
 
   factory Credito.fromJson(Map<String, dynamic> json) {
     return Credito(
@@ -35,8 +29,6 @@ class Credito {
       cred_numero: json['cred_numero'],
       cred_estado: json['cred_estado'],
       sucursal: Sucursal.fromJson(json['sucursal']),
-      
-      anexo_credito: AnexoCredito.fromJson(json['anexo_credito']),
     );
   }
   void toggle() {

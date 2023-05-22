@@ -8,6 +8,7 @@ import 'package:moviles/models/usuario.dart';
 import 'package:moviles/src/pages/DetallePage.dart';
 import 'package:moviles/src/pages/login_page.dart';
 import 'package:http/http.dart' as http;
+import '../../Services/globals.dart';
 import '../../models/solicitud.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/rendering.dart' as rendering;
@@ -100,7 +101,10 @@ class _NextPageState extends State<NextPage>
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: CircularImageWidget(usuario.persona.pers_foto),
+              child: ConditionalCircularImageWidget(
+                base64Image: usuario.persona.pers_foto,
+                fallbackImage: 'images/logo.png',
+              ),
             ),
           ),
         ],
@@ -240,23 +244,9 @@ class _NextPageState extends State<NextPage>
     );
   }
 
-  MemoryImage? imageFromBase64String(String base64String) {
-    try {
-      Uint8List bytes = base64Decode(base64String);
-      img.Image originalImage = img.decodeImage(bytes)!;
-      img.Image resizedImage =
-          img.copyResize(originalImage, width: 200, height: 200);
-      Uint8List resizedBytes = img.encodePng(resizedImage) as Uint8List;
-      return MemoryImage(resizedBytes);
-    } catch (error) {
-      print('Error al cargar la imagen: $error');
-      return null;
-    }
-  }
-
   Future<List<Solicitud>> listarSolicitudesEstado(String estado) async {
     try {
-      String url = "http://192.168.0.106:8080/api/solicitud/listarSoliEstado";
+      String url = "${APIConfig.baseURL}solicitud/listarSoliEstado";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -288,21 +278,31 @@ class Factura {
 }*/
 }
 
-class CircularImageWidget extends StatelessWidget {
+class ConditionalCircularImageWidget extends StatelessWidget {
   final String base64Image;
+  final String fallbackImage;
 
-  CircularImageWidget(this.base64Image);
+  ConditionalCircularImageWidget(
+      {required this.base64Image, required this.fallbackImage});
 
   @override
   Widget build(BuildContext context) {
-    String base64ImageWithoutHeader = base64Image.split(',').last;
-    Uint8List bytes = base64.decode(base64ImageWithoutHeader);
-
-    return ClipOval(
-      child: Image.memory(
-        bytes,
-        fit: BoxFit.cover,
-      ),
-    );
+    if (base64Image == null || base64Image.isEmpty) {
+      return ClipOval(
+        child: Image.asset(
+          fallbackImage,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else {
+      String base64ImageWithoutHeader = base64Image.split(',').last;
+      Uint8List bytes = base64.decode(base64ImageWithoutHeader);
+      return ClipOval(
+        child: Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
   }
 }

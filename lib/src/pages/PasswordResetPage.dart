@@ -6,6 +6,7 @@ import 'package:moviles/src/pages/login_page.dart';
 import 'dart:async';
 import 'dart:convert';
 
+import '../../Services/globals.dart';
 import '../../models/usuario.dart';
 
 class PasswordResetPage extends StatefulWidget {
@@ -129,7 +130,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
 
   Future<void> obtenerUsuario(String username) async {
     try {
-      String url = "http://192.168.0.106:8080/api/usuarios/search/$username";
+      String url = "${APIConfig.baseURL}usuarios/search/$username";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -171,7 +172,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       String username, String preguntaUno, String preguntaDos) async {
     try {
       String url =
-          "http://192.168.0.106:8080/api/usuarios/restablecerC/$username/$preguntaUno/$preguntaDos";
+          "${APIConfig.baseURL}usuarios/restablecerC/$username/$preguntaUno/$preguntaDos";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
