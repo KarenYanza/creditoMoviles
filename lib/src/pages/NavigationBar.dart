@@ -256,7 +256,7 @@ class _NextPageState extends State<NextPage>
 
   Future<List<Solicitud>> listarSolicitudesEstado(String estado) async {
     try {
-      String url = "http://localhost:8080/api/solicitud/listarSoliEstado";
+      String url = "http://192.168.0.106:8080/api/solicitud/listarSoliEstado";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);

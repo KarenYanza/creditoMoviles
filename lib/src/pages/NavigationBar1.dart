@@ -103,7 +103,7 @@ class _NextPageState1 extends State<NextPage1>
   Future<void> listarSolicitudesUsername1(String username) async {
     try {
       String url =
-          "http://localhost:8080/api/solicitud/listarSolicitudesUsername/$username";
+          "http://192.168.0.106:8080/api/solicitud/listarSolicitudesUsername/$username";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -120,7 +120,7 @@ class _NextPageState1 extends State<NextPage1>
   Future<List<Solicitud>> listarSolicitudesUsername(String username) async {
     try {
       String url =
-          "http://localhost:8080/api/solicitud/listarSolicitudesUsername/$username";
+          "http://192.168.0.106:8080/api/solicitud/listarSolicitudesUsername/$username";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);

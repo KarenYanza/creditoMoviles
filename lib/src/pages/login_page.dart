@@ -151,66 +151,60 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> obtenerUsuarioYLogin(String username, String password) async {
     try {
-      final ip = await intranetIpv4();
-      String localhost = ip.rawAddress as String;
-      if (localhost != null) {
-        String domain = 'http://$localhost:8080/api/usuarios/search/$username';
-        final response = await http.get(Uri.parse(domain));
-        if (response.statusCode == 200) {
-          final jsonResponse = json.decode(response.body);
-          Usuario u = Usuario.fromJson(jsonResponse);
-          if (u.usua_password == password) {
-            // Usuario y contraseña coinciden
-            if (u.rol.rol_id == 3) {
-              // Administrador
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NextPage(usuario: u)),
-              );
-            } else if (u.rol.rol_id == 4) {
-              // Cliente
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NextPage1(usuario: u)),
-              );
-            } else if (u.rol.rol_id == 2 || u.rol.rol_id == 1) {
-              showErrorMessage(
-                  'Su rol no tiene permiso para iniciar sesión en la aplicación móvil.');
-              _userController.clear();
-              _passwordController.clear();
-              setState(() {
-                logoImage = 'images/logo.png';
-              });
-            }
-          } else {
-            failedAttempts++; // Incrementar el contador de intentos fallidos
-
-            if (failedAttempts >= 3) {
-              showErrorMessage(
-                  'Has excedido el número máximo de intentos fallidos');
-              _userController.clear();
-              _passwordController.clear();
-              setState(() {
-                logoImage = 'images/logo.png';
-              });
-            } else {
-              showErrorMessage('Contraseña incorrecta');
-              _passwordController.clear();
-              if (u.persona.pers_foto.isNotEmpty) {
-                setState(() {
-                  logoImage = u.persona.pers_foto;
-                });
-              }
-            }
+      String domain = 'http://192.168.0.106:8080/api/usuarios/search/$username';
+      final response = await http.get(Uri.parse(domain));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        Usuario u = Usuario.fromJson(jsonResponse);
+        if (u.usua_password == password) {
+          // Usuario y contraseña coinciden
+          if (u.rol.rol_id == 3) {
+            // Administrador
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NextPage(usuario: u)),
+            );
+          } else if (u.rol.rol_id == 4) {
+            // Cliente
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NextPage1(usuario: u)),
+            );
+          } else if (u.rol.rol_id == 2 || u.rol.rol_id == 1) {
+            showErrorMessage(
+                'Su rol no tiene permiso para iniciar sesión en la aplicación móvil.');
+            _userController.clear();
+            _passwordController.clear();
+            setState(() {
+              logoImage = 'images/logo.png';
+            });
           }
         } else {
-          showErrorMessage('Usuario no existe');
+          failedAttempts++; // Incrementar el contador de intentos fallidos
+
+          if (failedAttempts >= 3) {
+            showErrorMessage(
+                'Has excedido el número máximo de intentos fallidos');
+            _userController.clear();
+            _passwordController.clear();
+            setState(() {
+              logoImage = 'images/logo.png';
+            });
+          } else {
+            showErrorMessage('Contraseña incorrecta');
+            _passwordController.clear();
+            if (u.persona.pers_foto.isNotEmpty) {
+              setState(() {
+                logoImage = u.persona.pers_foto;
+              });
+            }
+          }
         }
       } else {
-        showErrorMessage('No se pudo obtener la dirección IP');
+        showErrorMessage('Usuario no existe');
       }
     } catch (error) {
-      showErrorMessage('Error al obtener la dirección IP');
+      showErrorMessage('Usuario invalido');
       _userController.clear();
       _passwordController.clear();
     }

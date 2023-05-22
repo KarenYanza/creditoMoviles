@@ -129,7 +129,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
 
   Future<void> obtenerUsuario(String username) async {
     try {
-      String url = "http://localhost:8080/api/usuarios/search/$username";
+      String url = "http://192.168.0.106:8080/api/usuarios/search/$username";
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
