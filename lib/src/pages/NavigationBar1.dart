@@ -119,15 +119,17 @@ class _NextPageState1 extends State<NextPage1>
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: DataTable(
-                    columnSpacing: 20, // Espacio entre columnas
+                    columnSpacing: 20,
                     columns: [
                       DataColumn(
                         label: Container(
-                          width: 60, // Ancho de la celda de ID
+                          width: 60,
                           child: Text(
                             'ID',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
@@ -135,21 +137,27 @@ class _NextPageState1 extends State<NextPage1>
                         label: Text(
                           'Fecha',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                       DataColumn(
                         label: Text(
                           'Monto',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                       DataColumn(
                         label: Text(
                           'Estado',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ],
@@ -158,12 +166,82 @@ class _NextPageState1 extends State<NextPage1>
                         cells: [
                           DataCell(
                             Container(
-                              width: 60, // Ancho de la celda de ID
+                              width: 60,
                               child: Text(
                                 solicitud1.soliid.toString(),
                                 style: TextStyle(fontSize: 14),
                               ),
                             ),
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  String estadoRegistro =
+                                      solicitud1.soli_estado_registro;
+                                  IconData icono = Icons.sentiment_satisfied;
+                                  Color colorBarra = Colors.blue;
+                                  double valorProgreso = 1.0;
+
+                                  if (estadoRegistro == 'Registrado') {
+                                    icono = Icons.sentiment_satisfied;
+                                    colorBarra =
+                                        Color.fromARGB(255, 105, 137, 163);
+                                    valorProgreso = 0.1;
+                                  } else if (estadoRegistro == 'Revisado') {
+                                    icono = Icons.sentiment_neutral;
+                                    colorBarra = Colors.yellow;
+                                    valorProgreso = 0.5;
+                                  } else if (estadoRegistro == 'Aprobado' ||
+                                      estadoRegistro == 'Rechazado') {
+                                    icono = estadoRegistro == 'Aprobado'
+                                        ? Icons.sentiment_satisfied_alt
+                                        : Icons.sentiment_dissatisfied;
+                                    colorBarra = Colors.green;
+                                    valorProgreso = 1.0;
+                                  }
+
+                                  return AlertDialog(
+                                    title: Text('Detalles de la solicitud'),
+                                    content: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text('ID: ${solicitud1.soliid}'),
+                                        Text(
+                                            'Fecha: ${solicitud1.cred_fecha.toString()}'),
+                                        Text(
+                                            'Monto: ${solicitud1.cred_monto.toString()}'),
+                                        SizedBox(height: 20),
+                                        Row(
+                                          children: [
+                                            Icon(icono, size: 40),
+                                            SizedBox(width: 20),
+                                            Expanded(
+                                              child: LinearProgressIndicator(
+                                                value: valorProgreso,
+                                                backgroundColor: Colors.grey,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(colorBarra),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        child: Text('Cerrar'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
                           ),
                           DataCell(
                             Text(

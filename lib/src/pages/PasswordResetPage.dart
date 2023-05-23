@@ -25,12 +25,13 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   String _securityQuestion = "";
   bool _userFound = false;
   String logoImage = 'images/logo.png';
+  int id = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Recuperar contraseña"),
+        title: Text("Cambiar contraseña"),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -51,7 +52,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                   ),
                   SizedBox(width: 16.0),
                   Text(
-                    "Recuperar contraseña",
+                    "Cambio de contraseña",
                     style: TextStyle(
                       fontSize: 24.0,
                       fontWeight: FontWeight.bold,
@@ -64,7 +65,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
               Column(
                 children: [
                   Text(
-                    "Nombre de usuario",
+                    "Usuario",
                     style: TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,
@@ -137,6 +138,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         Usuario u = Usuario.fromJson(jsonResponse);
         print(u.persona.pers_cedula);
         if (u.rol.rol_id == 4) {
+          id = u.id;
           setState(() {
             _showVerification = true;
             _userFound = true;
@@ -195,7 +197,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
               String nuevaContrasena = '';
               String confirmacionContrasena = '';
               bool mostrarContrasena = false;
-
+              bool mostrarContrasena1 = false;
               return StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   return CustomAlertDialog(
@@ -232,18 +234,18 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                               confirmacionContrasena = value;
                             });
                           },
-                          obscureText: !mostrarContrasena,
+                          obscureText: !mostrarContrasena1,
                           decoration: InputDecoration(
                             labelText: 'Confirmación de contraseña',
                             suffixIcon: IconButton(
                               icon: Icon(
-                                mostrarContrasena
+                                mostrarContrasena1
                                     ? Icons.visibility_off
                                     : Icons.visibility,
                               ),
                               onPressed: () {
                                 setState(() {
-                                  mostrarContrasena = !mostrarContrasena;
+                                  mostrarContrasena1 = !mostrarContrasena1;
                                 });
                               },
                             ),
@@ -254,7 +256,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                     actions: [
                       TextButton(
                         child: Text("Aceptar"),
-                        onPressed: () {
+                        onPressed: () async {
                           if (nuevaContrasena.isEmpty ||
                               confirmacionContrasena.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -264,13 +266,27 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                             );
                           } else {
                             if (nuevaContrasena == confirmacionContrasena) {
-                              Navigator.of(context).pushNamed(LoginPage.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text('Contraseña cambiada exitosamente'),
-                                ),
-                              );
+                              var url = Uri.parse(
+                                  '${APIConfig.baseURL}usuarios/restablecer/$id?password=$nuevaContrasena');
+                              print(url);
+                              var response = await http.put(url);
+                              print(response.statusCode);
+                              if (response.statusCode == 201) {
+                                Navigator.of(context).pushNamed(LoginPage.id);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Contraseña cambiada exitosamente'),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content:
+                                        Text('Error al cambiar la contraseña'),
+                                  ),
+                                );
+                              }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
