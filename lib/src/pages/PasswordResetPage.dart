@@ -188,17 +188,110 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
             _usernameController.clear();
             _verificationController.clear();
             _verification1Controller.clear();
-            Navigator.of(context).pushNamed(LoginPage.id);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text("Tu contraseña ha sido enviada a " +
-                      u.persona.pers_correo)),
-            );
           });
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              String nuevaContrasena = '';
+              String confirmacionContrasena = '';
+              bool mostrarContrasena = false;
+
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return CustomAlertDialog(
+                    title: "Cambio de contraseña",
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              nuevaContrasena = value;
+                            });
+                          },
+                          obscureText: !mostrarContrasena,
+                          decoration: InputDecoration(
+                            labelText: 'Nueva contraseña',
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                mostrarContrasena
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  mostrarContrasena = !mostrarContrasena;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              confirmacionContrasena = value;
+                            });
+                          },
+                          obscureText: !mostrarContrasena,
+                          decoration: InputDecoration(
+                            labelText: 'Confirmación de contraseña',
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                mostrarContrasena
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  mostrarContrasena = !mostrarContrasena;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        child: Text("Aceptar"),
+                        onPressed: () {
+                          if (nuevaContrasena.isEmpty ||
+                              confirmacionContrasena.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Llenar todos los campos.'),
+                              ),
+                            );
+                          } else {
+                            if (nuevaContrasena == confirmacionContrasena) {
+                              Navigator.of(context).pushNamed(LoginPage.id);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content:
+                                      Text('Contraseña cambiada exitosamente'),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content:
+                                      Text('Las contraseñas no coinciden.'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          );
         } else {}
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuario inválido')),
+          SnackBar(content: Text('Preguntas sin contestar')),
         );
       }
     } catch (error) {
@@ -212,6 +305,69 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         _userFound = false;
       });
     }
+  }
+}
+
+class CustomAlertDialog extends StatelessWidget {
+  final String title;
+  final Widget content;
+  final List<Widget> actions;
+
+  CustomAlertDialog({
+    required this.title,
+    required this.content,
+    required this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      elevation: 0.0,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pushNamed(LoginPage.id);
+                  },
+                  child: Icon(
+                    Icons.close,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.0),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 20.0),
+            content,
+            SizedBox(height: 20.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: actions,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

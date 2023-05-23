@@ -33,98 +33,167 @@ class _NextPageState1 extends State<NextPage1>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Bienvenido ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}',
-          ),
-          automaticallyImplyLeading: false,
-          actions: [
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text("Cerrar sesión"),
-                      content: Text("¿Está seguro de que desea cerrar sesión?"),
-                      actions: [
-                        TextButton(
-                          child: Text("Cancelar"),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: Text("Aceptar"),
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(LoginPage.id);
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ConditionalCircularImageWidget(
-                  base64Image: usuario.persona.pers_foto,
-                  fallbackImage: 'images/logo.png',
-                ),
+      appBar: AppBar(
+        title: Text(
+          'Bienvenido ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos} ',
+        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Cerrar sesión"),
+                    content: Text("¿Está seguro de que desea cerrar sesión?"),
+                    actions: [
+                      TextButton(
+                        child: Text("Cancelar"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: Text("Aceptar"),
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(LoginPage.id);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ConditionalCircularImageWidget(
+                base64Image: usuario.persona.pers_foto,
+                fallbackImage: 'images/logo.png',
               ),
             ),
-          ],
-        ),
-        body: ListView.separated(
-            itemCount: solicitudes.length,
-            separatorBuilder: (context, index) => Divider(),
-            itemBuilder: (context, index) {
-              final solicitud = solicitudes[index];
-              return ListTile(
-                title: Text(usuario.persona.pers_cedula.toString()),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('ID: ' + solicitud.soliid.toString()),
-                    Text('Fecha: ' + solicitud.cred_fecha.toString()),
-                    Text('Monto: ' + solicitud.cred_monto.toString()),
-                    Text(
-                        'Estado: ' + solicitud.soli_estado_registro.toString()),
-                  ],
-                ),
-              );
-            }));
-    /*body: Table(
-        border: TableBorder.all(color: Colors.black),
-        children: [
-          TableRow(
-            children: [
-              TableCell(
-                  child: Text('ID',
-                      style: TextStyle(fontWeight: FontWeight.bold))),
-              TableCell(
-                  child: Text('Fecha',
-                      style: TextStyle(fontWeight: FontWeight.bold))),
-              TableCell(
-                  child: Text('Monto',
-                      style: TextStyle(fontWeight: FontWeight.bold))),
-              TableCell(
-                  child: Text('Estado',
-                      style: TextStyle(fontWeight: FontWeight.bold))),
-            ],
           ),
-          ...solicitudes.map((solicitud1) => TableRow(
-                children: [
-                  TableCell(child: Text(solicitud1.soliid.toString())),
-                  TableCell(child: Text(solicitud1.cred_fecha.toString())),
-                  TableCell(child: Text(solicitud1.cred_monto.toString())),
-                  TableCell(
-                      child: Text(solicitud1.soli_estado_registro.toString())),
-                ],
-              )),
         ],
       ),
-    );*/
+      body: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 10),
+              Text(
+                'Solicitudes',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Cédula: ${usuario.persona.pers_cedula}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 5,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columnSpacing: 20, // Espacio entre columnas
+                    columns: [
+                      DataColumn(
+                        label: Container(
+                          width: 60, // Ancho de la celda de ID
+                          child: Text(
+                            'ID',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Fecha',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Monto',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Estado',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                    ],
+                    rows: solicitudes.map((solicitud1) {
+                      return DataRow(
+                        cells: [
+                          DataCell(
+                            Container(
+                              width: 60, // Ancho de la celda de ID
+                              child: Text(
+                                solicitud1.soliid.toString(),
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              solicitud1.cred_fecha.toString(),
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              solicitud1.cred_monto.toString(),
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              solicitud1.soli_estado_registro.toString(),
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> listarSolicitudesUsername(String username) async {
