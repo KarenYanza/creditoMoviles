@@ -176,24 +176,25 @@ class _NextPageState1 extends State<NextPage1>
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  String estadoRegistro =
-                                      solicitud1.soli_estado_registro;
+                                  String estadoRegistro = solicitud1
+                                      .soli_estado_registro
+                                      .toLowerCase();
                                   IconData icono = Icons.sentiment_satisfied;
                                   Color colorBarra = Colors.blue;
                                   double valorProgreso = 1.0;
 
-                                  if (estadoRegistro == 'Registrado') {
+                                  if (estadoRegistro == 'registrado') {
                                     icono = Icons.sentiment_satisfied;
                                     colorBarra =
                                         Color.fromARGB(255, 105, 137, 163);
                                     valorProgreso = 0.1;
-                                  } else if (estadoRegistro == 'Revisado') {
+                                  } else if (estadoRegistro == 'validado') {
                                     icono = Icons.sentiment_neutral;
                                     colorBarra = Colors.yellow;
                                     valorProgreso = 0.5;
-                                  } else if (estadoRegistro == 'Aprobado' ||
-                                      estadoRegistro == 'Rechazado') {
-                                    icono = estadoRegistro == 'Aprobado'
+                                  } else if (estadoRegistro == 'aprobado' ||
+                                      estadoRegistro == 'rechazado') {
+                                    icono = estadoRegistro == 'aprobado'
                                         ? Icons.sentiment_satisfied_alt
                                         : Icons.sentiment_dissatisfied;
                                     colorBarra = Colors.green;
