@@ -6,10 +6,10 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:moviles/models/anexocredito.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:pdf/widgets.dart' as pw;
+import 'package:signature/signature.dart';
+import 'package:printing/printing.dart';
 import '../../Services/globals.dart';
-import '../../models/asesor.dart';
-import '../../models/usuario.dart';
 
 class DetallePage extends StatefulWidget {
   final int soliid;
@@ -155,11 +155,42 @@ class _DetallePageState extends State<DetallePage> {
                       bool allChecked =
                           checkStatus.values.every((element) => element);
                       if (allChecked) {
-                        // Lógica para imprimir si todo está correcto
-                        print('Todo está correcto');
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Firma'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Por favor, firme a continuación:'),
+                                  SizedBox(height: 16),
+                                  Signature(
+                                    controller: _signatureController,
+                                    height: 200,
+                                    backgroundColor: Colors.white,
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Cancelar'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    _generateReport();
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Imprimir'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       } else {
-                        // Lógica para imprimir si hay campos incorrectos
-                        // Buscamos los campos incorrectos y los imprimimos
                         List<String> incorrectos = [];
                         checkStatus.forEach((campo, correcto) {
                           if (!correcto) {
@@ -216,43 +247,43 @@ class _DetallePageState extends State<DetallePage> {
 
     switch (index) {
       case 0:
-        base64PDF = anexosss[0]?.ane_cred_cedula_conyugue;
+        base64PDF = anexosss[0].ane_cred_cedula_conyugue;
         break;
       case 1:
-        base64PDF = anexosss[0]?.ane_cred_cedula_solicitante;
+        base64PDF = anexosss[0].ane_cred_cedula_solicitante;
         break;
       case 2:
-        base64PDF = anexosss[0]?.ane_cred_estado_tarjetas_credito;
+        base64PDF = anexosss[0].ane_cred_estado_tarjetas_credito;
         break;
       case 3:
-        base64PDF = anexosss[0]?.ane_cred_facturas_alimentacion;
+        base64PDF = anexosss[0].ane_cred_facturas_alimentacion;
         break;
       case 4:
-        base64PDF = anexosss[0]?.ane_cred_facturas_educacion;
+        base64PDF = anexosss[0].ane_cred_facturas_educacion;
         break;
       case 5:
-        base64PDF = anexosss[0]?.ane_cred_facturas_otros;
+        base64PDF = anexosss[0].ane_cred_facturas_otros;
         break;
       case 6:
-        base64PDF = anexosss[0]?.ane_cred_facturas_salud;
+        base64PDF = anexosss[0].ane_cred_facturas_salud;
         break;
       case 7:
-        base64PDF = anexosss[0]?.ane_cred_facturas_servicios;
+        base64PDF = anexosss[0].ane_cred_facturas_servicios;
         break;
       case 8:
-        base64PDF = anexosss[0]?.ane_cred_matriculas;
+        base64PDF = anexosss[0].ane_cred_matriculas;
         break;
       case 9:
-        base64PDF = anexosss[0]?.ane_cred_predios;
+        base64PDF = anexosss[0].ane_cred_predios;
         break;
       case 10:
-        base64PDF = anexosss[0]?.ane_cred_recibos_vivienda;
+        base64PDF = anexosss[0].ane_cred_recibos_vivienda;
         break;
       case 11:
-        base64PDF = anexosss[0]?.ane_cred_remesas;
+        base64PDF = anexosss[0].ane_cred_remesas;
         break;
       case 12:
-        base64PDF = anexosss[0]?.ane_cred_roles_pago;
+        base64PDF = anexosss[0].ane_cred_roles_pago;
         break;
       default:
         base64PDF = null;
@@ -321,4 +352,54 @@ class _DetallePageState extends State<DetallePage> {
       );
     }
   }
+
+  Future<void> _generateReport() async {
+    final pdf = pw.Document();
+
+    // Agrega el contenido del informe
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('Id: 1'),
+              pw.Text('Nombre: John Doe'),
+              pw.Text('Fecha: 2023-05-24'),
+              pw.Text('Monto: \$1000'),
+              pw.SizedBox(height: 20),
+              pw.Text(
+                'Información adicional',
+                style:
+                    pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Table.fromTextArray(
+                context: context,
+                data: const <List<String>>[
+                  ['Campo', 'Correcto'],
+                  ['Campo 1', 'Sí'],
+                  ['Campo 2', 'No'],
+                  ['Campo 3', 'Sí'],
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    // Guarda el informe en el dispositivo
+    final output = await getApplicationDocumentsDirectory();
+    final file = File('${output.path}/informe.pdf');
+    await file.writeAsBytes(await pdf.save());
+
+    // Imprime el informe
+    await Printing.sharePdf(bytes: await pdf.save(), filename: 'informe.pdf');
+  }
+
+  final SignatureController _signatureController = SignatureController(
+    penStrokeWidth: 2,
+    penColor: Colors.black,
+  );
 }

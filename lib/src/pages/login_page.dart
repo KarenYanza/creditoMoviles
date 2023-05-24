@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intranet_ip/intranet_ip.dart';
-import 'package:lottie/lottie.dart';
 import 'package:moviles/Services/globals.dart';
 
 import 'package:moviles/models/usuario.dart';

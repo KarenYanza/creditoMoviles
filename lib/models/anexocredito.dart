@@ -1,4 +1,3 @@
-import 'credito.dart';
 
 class AnexoCredito {
   final int persid;
