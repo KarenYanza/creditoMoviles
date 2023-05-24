@@ -2,65 +2,75 @@ import 'credito.dart';
 
 class AnexoCredito {
   final int persid;
-  final String soliid;
-  final String aneCred_cedulaConyugue;
-  final String aneCred_predios;
-  final String aneCred_matriculas;
-  final String aneCred_rolesPago;
-  final String aneCred_recibosVivienda;
-  final String aneCred_remesas;
-  final String aneCred_estadoTarjetasCredito;
-  final String aneCred_facturasAlimentacion;
-  final String aneCred_facturasServicios;
-  final String aneCred_facturasSalud;
-  final String aneCred_facturasEducacion;
-  final String aneCred_facturasOtros;
-  bool aneCred_estado;
-  final Credito credito;
+  final int soliid;
+  final double ane_credid;
+  String ane_cred_cedula_conyugue;
+  String ane_cred_cedula_solicitante;
+  final bool ane_cred_estado;
+  String ane_cred_estado_tarjetas_credito;
+  String ane_cred_facturas_alimentacion;
+  String ane_cred_facturas_educacion;
+  String ane_cred_facturas_otros;
+  String ane_cred_facturas_salud;
+  String ane_cred_facturas_servicios;
+  String ane_cred_matriculas;
+  String ane_cred_predios;
+  String ane_cred_recibos_vivienda;
+  String ane_cred_remesas;
+  String ane_cred_roles_pago;
+  final int credid;
+  final String nombres;
+  String base64String;
   //final Sucursal sucursal;
 
   AnexoCredito({
     required this.persid,
     required this.soliid,
-    required this.aneCred_cedulaConyugue,
-    required this.aneCred_predios,
-    required this.aneCred_matriculas,
-    required this.aneCred_rolesPago,
-    required this.aneCred_recibosVivienda,
-    required this.aneCred_remesas,
-    required this.aneCred_estadoTarjetasCredito,
-    required this.aneCred_facturasAlimentacion,
-    required this.aneCred_facturasServicios,
-    required this.aneCred_facturasSalud,
-    required this.aneCred_facturasEducacion,
-    required this.aneCred_facturasOtros,
-    required this.aneCred_estado,
-    required this.credito,
+    required this.ane_credid,
+    required this.ane_cred_cedula_conyugue,
+    required this.ane_cred_cedula_solicitante,
+    required this.ane_cred_estado,
+    required this.ane_cred_estado_tarjetas_credito,
+    required this.ane_cred_facturas_alimentacion,
+    required this.ane_cred_facturas_educacion,
+    required this.ane_cred_facturas_otros,
+    required this.ane_cred_facturas_salud,
+    required this.ane_cred_facturas_servicios,
+    required this.ane_cred_matriculas,
+    required this.ane_cred_predios,
+    required this.ane_cred_recibos_vivienda,
+    required this.ane_cred_remesas,
+    required this.ane_cred_roles_pago,
+    required this.credid,
+    required this.nombres,
+    required this.base64String,
     // required this.sucursal,
   });
 //0106977176
   factory AnexoCredito.fromJson(Map<String, dynamic> json) {
     return AnexoCredito(
       persid: json['persid'] ?? 0,
-      soliid: json['soliid'] ?? '',
-      aneCred_cedulaConyugue: json['aneCred_cedulaConyugue'] ?? '',
-      aneCred_predios: json['aneCred_predios'] ?? '',
-      aneCred_matriculas: json['aneCred_matriculas'] ?? '',
-      aneCred_rolesPago: json['aneCred_rolesPago'] ?? '',
-      aneCred_recibosVivienda: json['aneCred_recibosVivienda'],
-      aneCred_remesas: json['aneCred_remesas'] ?? '',
-      aneCred_estadoTarjetasCredito:
-          json['aneCred_estadoTarjetasCredito'] ?? '',
-      aneCred_facturasAlimentacion: json['aneCred_facturasAlimentacion'] ?? '',
-      aneCred_facturasServicios: json['aneCred_facturasServicios'] ?? '',
-      aneCred_facturasSalud: json['aneCred_facturasSalud'] ?? '',
-      aneCred_facturasEducacion: json['aneCred_facturasEducacion'],
-      aneCred_facturasOtros: json['aneCred_facturasOtros'] ?? '',
-      aneCred_estado: json['aneCred_estado'] ?? false,
-      //persona: json['persona'] != null ? Persona.fromJson(json['persona']) : Persona(pers_apellidos: '', pers_celular: '', pers_cedula: '', pers_codigoPostal: '', pers_correo: '', pers_estadoCivil: '', pers_fechaNacimiento: '', pers_foto: '', pers_genero: '', pers_id: 0, pers_nacionalidad: '', pers_nivelInstruccion: '', pers_nombres: '', pers_profesion: '', pers_sexo: '', pers_telefono: ''),
-      credito: Credito.fromJson(json['credito'] ?? ''),
-      //rol: json['rol'] != null ? Rol.fromJson(json['rol']) : Rol(rol_descripcion: '', rol_id:0 , rol_nombre: ''),
-      //sucursal: Sucursal.fromJson(json['sucursal']),
+      soliid: json['soliid'] ?? 0,
+      ane_credid: json['ane_credid'] ?? 0,
+      ane_cred_cedula_conyugue: json['ane_cred_cedula_conyugue'] ?? '',
+      ane_cred_cedula_solicitante: json['ane_cred_cedula_solicitante'] ?? '',
+      ane_cred_estado: json['ane_cred_estado'] ?? false,
+      ane_cred_estado_tarjetas_credito:
+          json['ane_cred_estado_tarjetas_credito'] ?? '',
+      ane_cred_facturas_alimentacion:
+          json['ane_cred_facturas_alimentacion'] ?? '',
+      ane_cred_facturas_educacion: json['ane_cred_facturas_educacion'] ?? '',
+      ane_cred_facturas_otros: json['ane_cred_facturas_otros'] ?? '',
+      ane_cred_facturas_salud: json['ane_cred_facturas_salud'] ?? '',
+      ane_cred_facturas_servicios: json['ane_cred_facturas_servicios'] ?? '',
+      ane_cred_matriculas: json['ane_cred_matriculas'] ?? '',
+      ane_cred_predios: json['ane_cred_predios'] ?? '',
+      ane_cred_recibos_vivienda: json['ane_cred_recibos_vivienda'] ?? '',
+      ane_cred_remesas: json['ane_cred_remesas'] ?? '',
+      ane_cred_roles_pago: json['ane_cred_roles_pago'] ?? '',
+      credid: json['credid'] ?? 0,
+      nombres: json['nombres'] ?? '',
+      base64String: json['base64String'] ?? '',
     );
   }
 }

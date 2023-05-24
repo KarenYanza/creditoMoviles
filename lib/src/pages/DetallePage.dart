@@ -33,27 +33,29 @@ class DetallePage extends StatefulWidget {
 }
 
 class _DetallePageState extends State<DetallePage> {
+  List<AnexoCredito> anexosss = [];
   @override
   void initState() {
     super.initState();
-    listarAnexos(widget.soliid);
-    print(listarAnexos(widget.soliid));
+    int id = widget.soliid;
+    listarAnexos(id);
   }
 
   List<AnexoCredito> anexlist = [];
   Map<String, bool> checkStatus = {
-    'Cédula de Identidad Solicitante': false,
     'Cedula Ciudadania Conyugue': false,
-    'Predio Urbano': false,
-    'Matrícula del Vehículo': false,
-    'Roles de pago': false,
-    'Gastos de Vivienda': false,
+    'Cédula de Identidad Solicitante': false,
     'Estado de cuenta de tarjeta de crédito': false,
     'Factura de consumo de alimentos': false,
-    'Gastos Servicios Básicos': false,
-    'Factura de Salud': false,
     'Factura de Educacion': false,
-    'Letras de Cambio': false,
+    'Otros gastos': false,
+    'Factura de Salud': false,
+    'Gastos Servicios Básicos': false,
+    'Matrícula del Vehículo': false,
+    'Predio Urbano': false,
+    'Gastos de Vivienda': false,
+    'Remesas': false,
+    'Roles de pago': false,
   };
 
   String? pdfPath;
@@ -109,33 +111,40 @@ class _DetallePageState extends State<DetallePage> {
                   DataColumn(label: Text('PDF')),
                   DataColumn(label: Text('Correcto')),
                 ],
-                rows: checkStatus.keys
-                    .map(
-                      (e) => DataRow(
-                        cells: [
-                          DataCell(Text(e)),
-                          DataCell(
-                            ElevatedButton(
-                              onPressed: () {
-                                downloadAndShowPdf();
-                              },
-                              child: Text('Descargar'),
+                rows: checkStatus.keys.isNotEmpty
+                    ? List.from(checkStatus.keys)
+                        .asMap()
+                        .map(
+                          (index, e) => MapEntry(
+                            index,
+                            DataRow(
+                              cells: [
+                                DataCell(Text(e)),
+                                DataCell(
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      downloadAndShowPdf(index);
+                                    },
+                                    child: Text('Descargar'),
+                                  ),
+                                ),
+                                DataCell(
+                                  Checkbox(
+                                    value: checkStatus[e],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        checkStatus[e] = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          DataCell(
-                            Checkbox(
-                              value: checkStatus[e],
-                              onChanged: (value) {
-                                setState(() {
-                                  checkStatus[e] = value!;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                    .toList(),
+                        )
+                        .values
+                        .toList()
+                    : [],
               ),
               SizedBox(height: 20),
               Row(
@@ -178,6 +187,8 @@ class _DetallePageState extends State<DetallePage> {
     }
   }
 
+  // Lista para almacenar los resultados de la consulta
+
   Future<void> listarAnexos(int id) async {
     print("ingresa");
     String url = "${APIConfig.baseURL}anexoCredito/buscarAnexos/$id";
@@ -185,77 +196,129 @@ class _DetallePageState extends State<DetallePage> {
     print(url);
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      print("Solicitudes obtenidad: ${jsonData}");
+      print("Solicitudes obtenidas: ${jsonData}");
       setState(() {
-        anexlist =
-            jsonData.map<Asesor>((item) => Asesor.fromJson(item)).toList();
+        anexosss = jsonData
+            .map<AnexoCredito>((item) => AnexoCredito.fromJson(item))
+            .toList();
+        print(anexosss);
       });
+
+      // Realizar cualquier otra acción necesaria con la lista anexlist
+      // ...
     } else {
       print("Error al obtener la lista");
     }
   }
 
-  void downloadAndShowPdf() async {
-    // Simulando la descarga del archivo PDF en base64
-    String base64PDF = "<aquí va tu base64 del archivo PDF>";
+  void downloadAndShowPdf(int index) async {
+    String? base64PDF;
 
-    // Decodificar el archivo PDF base64 a bytes
-    List<int> pdfBytes = base64Decode(base64PDF);
+    switch (index) {
+      case 0:
+        base64PDF = anexosss[0]?.ane_cred_cedula_conyugue;
+        break;
+      case 1:
+        base64PDF = anexosss[0]?.ane_cred_cedula_solicitante;
+        break;
+      case 2:
+        base64PDF = anexosss[0]?.ane_cred_estado_tarjetas_credito;
+        break;
+      case 3:
+        base64PDF = anexosss[0]?.ane_cred_facturas_alimentacion;
+        break;
+      case 4:
+        base64PDF = anexosss[0]?.ane_cred_facturas_educacion;
+        break;
+      case 5:
+        base64PDF = anexosss[0]?.ane_cred_facturas_otros;
+        break;
+      case 6:
+        base64PDF = anexosss[0]?.ane_cred_facturas_salud;
+        break;
+      case 7:
+        base64PDF = anexosss[0]?.ane_cred_facturas_servicios;
+        break;
+      case 8:
+        base64PDF = anexosss[0]?.ane_cred_matriculas;
+        break;
+      case 9:
+        base64PDF = anexosss[0]?.ane_cred_predios;
+        break;
+      case 10:
+        base64PDF = anexosss[0]?.ane_cred_recibos_vivienda;
+        break;
+      case 11:
+        base64PDF = anexosss[0]?.ane_cred_remesas;
+        break;
+      case 12:
+        base64PDF = anexosss[0]?.ane_cred_roles_pago;
+        break;
+      default:
+        base64PDF = null;
+        break;
+    }
 
-    // Obtener el directorio temporal del dispositivo
-    Directory tempDir = await getTemporaryDirectory();
+    if (base64PDF != null && base64PDF.isNotEmpty) {
+      // Decodificar el archivo PDF base64 a bytes
+      List<int> pdfBytes = base64Decode(base64PDF);
 
-    // Crear un archivo temporal para el PDF
-    File tempFile = File('${tempDir.path}/documento.pdf');
+      // Obtener el directorio temporal del dispositivo
+      Directory tempDir = await getTemporaryDirectory();
 
-    // Escribir los bytes del PDF en el archivo temporal
-    await tempFile.writeAsBytes(pdfBytes, flush: true);
+      // Crear un archivo temporal para el PDF
+      File tempFile = File('${tempDir.path}/documento.pdf');
 
-    // Obtener la ruta del archivo PDF descargado
-    String path = tempFile.path;
+      // Escribir los bytes del PDF en el archivo temporal
+      await tempFile.writeAsBytes(pdfBytes, flush: true);
 
-    setState(() {
-      // Almacenar la ruta del archivo PDF en la variable pdfPath
-      pdfPath = path;
-    });
+      // Obtener la ruta del archivo PDF descargado
+      String path = tempFile.path;
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('PDF'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            content: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: PDFView(
+                filePath: path,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Cerrar'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('No aplica'),
+            content: Text('El archivo no está disponible.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Cerrar'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 }
-/*
-class DetallePage extends StatelessWidget {
-
-  final int soliid;
-  final String cred_fecha;
-  final double cred_monto;
-  final String soli_estado_registro;
-  final String usuario_username;
-  final int sucuid;
-  final String nombres;
-  DetallePage( 
-      {required this.soliid,
-      required this.cred_fecha,
-      required this.cred_monto,
-      required this.soli_estado_registro,
-      required this.usuario_username,
-      required this.sucuid,
-      required this.nombres});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Detalle de la solicitud'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('ID: $soliid'),
-            Text('Nombre: $nombres'),
-            Text('Fecha: $cred_fecha'),
-            Text('Monto: $cred_monto'),
-          ],
-        ),
-      ),
-    );
-  }
-}*/
