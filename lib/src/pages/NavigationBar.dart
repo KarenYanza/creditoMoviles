@@ -27,7 +27,7 @@ class _NextPageState extends State<NextPage>
   List<Tab> _tabs = [
     Tab(text: 'Todos'),
     Tab(text: 'Pendientes'),
-    Tab(text: 'Aprobados'),
+    Tab(text: 'Validados'),
     Tab(text: 'Rechazados'),
   ];
 
@@ -38,18 +38,27 @@ class _NextPageState extends State<NextPage>
     usuario = widget.usuario;
     super.initState();
     listarSolicitudesUsername(usuario.sucursal.sucu_id);
-    print("sicirsal");
-    print(usuario.sucursal.sucu_id);
     _tabController = TabController(length: _tabs.length, vsync: this);
-    print(usuario.usua_preguntaDos);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            'Bienvenido ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}  '),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Bienvenido',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+            SizedBox(height: 4), // Espacio entre los textos
+            Text(
+              '${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: _tabs,
@@ -92,28 +101,7 @@ class _NextPageState extends State<NextPage>
           ),
         ],
       ),
-      body: ListView.separated(
-        itemCount: asslist.length,
-        separatorBuilder: (context, index) => Divider(),
-        itemBuilder: (context, index) {
-          final asesor = asslist[index];
-          return ListTile(
-            title: Text(usuario.sucursal.sucu_nombre.toString()),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Solicitid: " + asesor.soliid.toString()),
-                Text("Cedula: " + asesor.usuario_username.toString()),
-                Text("Nombre: " + asesor.nombres.toString()),
-                Text("Moto: " + asesor.cred_monto.toString()),
-                Text("Estado: " + asesor.soli_estado_registro.toString()),
-              ],
-            ),
-          );
-        },
-      ),
-
-      /*TabBarView(
+      body: TabBarView(
         controller: _tabController,
         children: [
           _buildTodosScreen(),
@@ -121,151 +109,284 @@ class _NextPageState extends State<NextPage>
           _buildAprobadosScreen(),
           _buildRechazadosScreen(),
         ],
-      ),*/
+      ),
     );
   }
 
   Widget _buildTodosScreen() {
-    return FutureBuilder<List<Solicitud>>(
-      future: listarSolicitudesEstado('Todos'),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          List<Solicitud> solicitudes = snapshot.data!;
-          print(solicitudes);
-          return ListView.builder(
-            itemCount: solicitudes.length,
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.separated(
+            itemCount: asslist.length,
+            separatorBuilder: (context, index) => Divider(),
             itemBuilder: (context, index) {
-              final solicitud = solicitudes[index];
-              return InkWell(
-                onTap: () {
-                  if (solicitud.soli_estado == "En proceso") {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => DetallePage(
-                          id: solicitud.soli_id,
-                          nombre: solicitud.persona.pers_nombres +
-                              solicitud.persona.pers_apellidos,
-                          fecha: solicitud.credito.cred_fecha,
-                          monto: solicitud.credito.cred_monto,
-                        ),
-                      ),
-                    );
-                  }
-                },
+              final asesor = asslist[index];
+              return Card(
+                elevation: 2,
                 child: ListTile(
-                  title: Text(solicitud.persona.pers_nombres),
-                  subtitle: Text(
-                    'Fecha: ${solicitud.credito.cred_fecha} - Monto: ${solicitud.credito.cred_monto}',
+                  title: Text(
+                    asesor.nombres.toString(),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 8),
+                      Text(
+                        "Solicitud: " + asesor.soliid.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Cedula: " + asesor.usuario_username,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Monto: " + asesor.cred_monto.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Estado: " + asesor.soli_estado_registro.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                    ],
                   ),
                 ),
               );
             },
-          );
-        } else if (snapshot.hasError) {
-          return Text('Error al cargar las solicitudes');
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.all(16),
+          color: Colors.grey[300],
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Text(
+              " Sucursal " + usuario.sucursal.sucu_nombre.toString(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildPendientesScreen() {
-    return FutureBuilder<List<Solicitud>>(
-      future: listarSolicitudesEstado('Pendientes'),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          List<Solicitud> solicitudes = snapshot.data!;
-          // Construye la pantalla utilizando las solicitudes pendientes
-          // ...
-          return ListView.builder(
-            itemCount: solicitudes.length,
+    List<Asesor> filteredList = asslist
+        .where((asesor) => asesor.soli_estado_registro == 'Registrado')
+        .toList();
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.separated(
+            itemCount: filteredList.length,
+            separatorBuilder: (context, index) => Divider(),
             itemBuilder: (context, index) {
-              Solicitud solicitud = solicitudes[index];
-              return ListTile(
-                title: Text(solicitud.credito.cred_fecha),
-                subtitle: Text(solicitud.credito.cred_plazo),
+              final asesor = filteredList[index];
+              return Card(
+                elevation: 2,
+                child: ListTile(
+                  title: Text(
+                    asesor.nombres.toString(),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 8),
+                      Text(
+                        "Solicitud: " + asesor.soliid.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Cedula: " + asesor.usuario_username,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Monto: " + asesor.cred_monto.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Estado: " + asesor.soli_estado_registro.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetallePage(
+                          soliid: asesor.soliid,
+                          cred_fecha: asesor.cred_fecha,
+                          cred_monto: asesor.cred_monto,
+                          soli_estado_registro: asesor.soli_estado_registro,
+                          usuario_username: asesor.usuario_username,
+                          sucuid: asesor.sucuid,
+                          nombres: asesor.nombres,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               );
             },
-          );
-        } else if (snapshot.hasError) {
-          return Text('Error al cargar las solicitudes pendientes');
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.all(16),
+          color: Colors.grey[300],
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Text(
+              " Sucursal " + usuario.sucursal.sucu_nombre.toString(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildAprobadosScreen() {
-    return FutureBuilder<List<Solicitud>>(
-      future: listarSolicitudesEstado('Aprobados'),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          List<Solicitud> solicitudes = snapshot.data!;
-          // Construir la pantalla utilizando las solicitudes aprobadas
-          return ListView.builder(
-            itemCount: solicitudes.length,
+    List<Asesor> filteredList = asslist
+        .where((asesor) => asesor.soli_estado_registro == 'Validado')
+        .toList();
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.separated(
+            itemCount: filteredList.length,
+            separatorBuilder: (context, index) => Divider(),
             itemBuilder: (context, index) {
-              Solicitud solicitud = solicitudes[index];
-              return ListTile(
-                title: Text(solicitud.credito.cred_fecha),
-                subtitle: Text(solicitud.credito.cred_plazo),
+              final asesor = filteredList[index];
+              return Card(
+                elevation: 2,
+                child: ListTile(
+                  title: Text(
+                    asesor.nombres.toString(),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 8),
+                      Text(
+                        "Solicitud: " + asesor.soliid.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Cedula: " + asesor.usuario_username,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Monto: " + asesor.cred_monto.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Estado: " + asesor.soli_estado_registro.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                    ],
+                  ),
+                ),
               );
             },
-          );
-        } else if (snapshot.hasError) {
-          return Text('Error al cargar las solicitudes aprobadas');
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.all(16),
+          color: Colors.grey[300],
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Text(
+              " Sucursal " + usuario.sucursal.sucu_nombre.toString(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildRechazadosScreen() {
-    return FutureBuilder<List<Solicitud>>(
-      future: listarSolicitudesEstado('Rechazados'),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          List<Solicitud> solicitudes = snapshot.data!;
-          // Construir la pantalla utilizando las solicitudes rechazadas
-          return ListView.builder(
-            itemCount: solicitudes.length,
+    List<Asesor> filteredList = asslist
+        .where((asesor) => asesor.soli_estado_registro == 'Rechazado')
+        .toList();
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.separated(
+            itemCount: filteredList.length,
+            separatorBuilder: (context, index) => Divider(),
             itemBuilder: (context, index) {
-              Solicitud solicitud = solicitudes[index];
-              return ListTile(
-                title: Text(solicitud.credito.cred_fecha),
-                subtitle: Text(solicitud.credito.cred_plazo),
+              final asesor = filteredList[index];
+              return Card(
+                elevation: 2,
+                child: ListTile(
+                  title: Text(
+                    asesor.nombres.toString(),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 8),
+                      Text(
+                        "Solicitud: " + asesor.soliid.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Cedula: " + asesor.usuario_username,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Monto: " + asesor.cred_monto.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        "Estado: " + asesor.soli_estado_registro.toString(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                    ],
+                  ),
+                ),
               );
             },
-          );
-        } else if (snapshot.hasError) {
-          return Text('Error al cargar las solicitudes rechazadas');
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.all(16),
+          color: Colors.grey[300],
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Text(
+              " Sucursal " + usuario.sucursal.sucu_nombre.toString(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
-  }
-
-  Future<List<Solicitud>> listarSolicitudesEstado(String estado) async {
-    try {
-      String url = "${APIConfig.baseURL}solicitud/listarSoliEstado";
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        List<Solicitud> solicitudes = [];
-        for (var item in jsonResponse) {
-          solicitudes.add(Solicitud.fromJson(item));
-        }
-        return solicitudes;
-      } else {
-        return [];
-      }
-    } catch (error) {
-      return [];
-    }
   }
 
   Future<void> listarSolicitudesUsername(int id) async {

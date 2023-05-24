@@ -34,8 +34,19 @@ class _NextPageState1 extends State<NextPage1>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Bienvenido ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos} ',
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Bienvenido',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+            SizedBox(height: 4), // Espacio entre los textos
+            Text(
+              '${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
         automaticallyImplyLeading: false,
         actions: [
@@ -192,23 +203,24 @@ class _NextPageState1 extends State<NextPage1>
                                     icono = Icons.sentiment_neutral;
                                     colorBarra = Colors.yellow;
                                     valorProgreso = 0.5;
-                                  } else if (estadoRegistro == 'aprobado' ||
-                                      estadoRegistro == 'rechazado') {
-                                    icono = estadoRegistro == 'aprobado'
-                                        ? Icons.sentiment_satisfied_alt
-                                        : Icons.sentiment_dissatisfied;
+                                  } else if (estadoRegistro == 'aprobado') {
+                                    icono = Icons.sentiment_satisfied_alt;
                                     colorBarra = Colors.green;
+                                    valorProgreso = 1.0;
+                                  } else if (estadoRegistro == 'rechazado') {
+                                    icono = Icons.sentiment_dissatisfied;
+                                    colorBarra = Colors.red;
                                     valorProgreso = 1.0;
                                   }
 
                                   return AlertDialog(
-                                    title: Text('Detalles de la solicitud'),
+                                    title: Text(
+                                        'Solicitud # ${solicitud1.soliid}'),
                                     content: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text('ID: ${solicitud1.soliid}'),
                                         Text(
                                             'Fecha: ${solicitud1.cred_fecha.toString()}'),
                                         Text(

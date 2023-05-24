@@ -1,8 +1,8 @@
 import 'credito.dart';
 
 class AnexoCredito {
-  final int aneCred_id;
-  final String aneCred_cedulaSolicitante;
+  final int persid;
+  final String soliid;
   final String aneCred_cedulaConyugue;
   final String aneCred_predios;
   final String aneCred_matriculas;
@@ -20,19 +20,19 @@ class AnexoCredito {
   //final Sucursal sucursal;
 
   AnexoCredito({
-    required this.aneCred_id,
-    required this.aneCred_cedulaSolicitante,
+    required this.persid,
+    required this.soliid,
     required this.aneCred_cedulaConyugue,
     required this.aneCred_predios,
     required this.aneCred_matriculas,
     required this.aneCred_rolesPago,
-     required this.aneCred_recibosVivienda,
+    required this.aneCred_recibosVivienda,
     required this.aneCred_remesas,
     required this.aneCred_estadoTarjetasCredito,
     required this.aneCred_facturasAlimentacion,
     required this.aneCred_facturasServicios,
     required this.aneCred_facturasSalud,
-     required this.aneCred_facturasEducacion,
+    required this.aneCred_facturasEducacion,
     required this.aneCred_facturasOtros,
     required this.aneCred_estado,
     required this.credito,
@@ -41,15 +41,16 @@ class AnexoCredito {
 //0106977176
   factory AnexoCredito.fromJson(Map<String, dynamic> json) {
     return AnexoCredito(
-      aneCred_id: json['aneCred_id'],
-      aneCred_cedulaSolicitante: json['aneCred_cedulaSolicitante'] ?? '',
+      persid: json['persid'] ?? 0,
+      soliid: json['soliid'] ?? '',
       aneCred_cedulaConyugue: json['aneCred_cedulaConyugue'] ?? '',
       aneCred_predios: json['aneCred_predios'] ?? '',
       aneCred_matriculas: json['aneCred_matriculas'] ?? '',
       aneCred_rolesPago: json['aneCred_rolesPago'] ?? '',
       aneCred_recibosVivienda: json['aneCred_recibosVivienda'],
       aneCred_remesas: json['aneCred_remesas'] ?? '',
-      aneCred_estadoTarjetasCredito: json['aneCred_estadoTarjetasCredito'] ?? '',
+      aneCred_estadoTarjetasCredito:
+          json['aneCred_estadoTarjetasCredito'] ?? '',
       aneCred_facturasAlimentacion: json['aneCred_facturasAlimentacion'] ?? '',
       aneCred_facturasServicios: json['aneCred_facturasServicios'] ?? '',
       aneCred_facturasSalud: json['aneCred_facturasSalud'] ?? '',
