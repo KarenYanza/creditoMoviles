@@ -1,18 +1,15 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:moviles/models/asesor.dart';
 import 'package:moviles/models/usuario.dart';
 import 'package:moviles/src/pages/DetallePage.dart';
 import 'package:moviles/src/pages/login_page.dart';
 import 'package:http/http.dart' as http;
 import '../../Services/globals.dart';
 import '../../models/solicitud.dart';
-import 'package:image/image.dart' as img;
-import 'package:flutter/rendering.dart' as rendering;
-import 'dart:ui' as ui;
 
 class NextPage extends StatefulWidget {
   final Usuario usuario;
@@ -26,6 +23,7 @@ class _NextPageState extends State<NextPage>
     with SingleTickerProviderStateMixin {
   late Usuario usuario;
   late TabController _tabController;
+  List<Asesor> asslist = [];
   List<Tab> _tabs = [
     Tab(text: 'Todos'),
     Tab(text: 'Pendientes'),
@@ -33,30 +31,15 @@ class _NextPageState extends State<NextPage>
     Tab(text: 'Rechazados'),
   ];
 
-  // Agrega una variable para almacenar el estado seleccionado
   String _selectedEstado = 'Todos';
-/*class _NextPageState extends State<NextPage>
-    with SingleTickerProviderStateMixin {
-  late Usuario usuario;
-  late TabController _tabController;
-  List<Tab> _tabs = [
-    Tab(text: 'Todos'),
-    Tab(text: 'Pendientes'),
-    Tab(text: 'Aprobados'),
-    Tab(text: 'Rechazados'),
-  ];
 
-  static List<Factura> _data = [
-    Factura(
-        id: 1, nombre: 'Karen Yanzaguano', fecha: '01/01/2022', monto: 100.0),
-    Factura(
-        id: 2, nombre: 'Anthony Morocho', fecha: '02/01/2022', monto: 200.0),
-    Factura(id: 3, nombre: 'Laura Zambrano', fecha: '03/01/2022', monto: 300.0),
-  ];*/
   @override
   void initState() {
     usuario = widget.usuario;
     super.initState();
+    listarSolicitudesUsername(usuario.sucursal.sucu_id);
+    print("sicirsal");
+    print(usuario.sucursal.sucu_id);
     _tabController = TabController(length: _tabs.length, vsync: this);
     print(usuario.usua_preguntaDos);
   }
@@ -109,7 +92,28 @@ class _NextPageState extends State<NextPage>
           ),
         ],
       ),
-      body: TabBarView(
+      body: ListView.separated(
+        itemCount: asslist.length,
+        separatorBuilder: (context, index) => Divider(),
+        itemBuilder: (context, index) {
+          final asesor = asslist[index];
+          return ListTile(
+            title: Text(usuario.sucursal.sucu_nombre.toString()),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Solicitid: " + asesor.soliid.toString()),
+                Text("Cedula: " + asesor.usuario_username.toString()),
+                Text("Nombre: " + asesor.nombres.toString()),
+                Text("Moto: " + asesor.cred_monto.toString()),
+                Text("Estado: " + asesor.soli_estado_registro.toString()),
+              ],
+            ),
+          );
+        },
+      ),
+
+      /*TabBarView(
         controller: _tabController,
         children: [
           _buildTodosScreen(),
@@ -117,7 +121,7 @@ class _NextPageState extends State<NextPage>
           _buildAprobadosScreen(),
           _buildRechazadosScreen(),
         ],
-      ),
+      ),*/
     );
   }
 
@@ -151,7 +155,8 @@ class _NextPageState extends State<NextPage>
                 child: ListTile(
                   title: Text(solicitud.persona.pers_nombres),
                   subtitle: Text(
-                      'Fecha: ${solicitud.credito.cred_fecha} - Monto: ${solicitud.credito.cred_monto}'),
+                    'Fecha: ${solicitud.credito.cred_fecha} - Monto: ${solicitud.credito.cred_monto}',
+                  ),
                 ),
               );
             },
@@ -262,20 +267,23 @@ class _NextPageState extends State<NextPage>
       return [];
     }
   }
-/*
-class Factura {
-  final int id;
-  final String nombre;
-  final String fecha;
-  final double monto;
 
-  Factura({
-    required this.id,
-    required this.nombre,
-    required this.fecha,
-    required this.monto,
-  });
-}*/
+  Future<void> listarSolicitudesUsername(int id) async {
+    print("ingresa");
+    String url = "${APIConfig.baseURL}solicitud/listarSolicitudesSucursal/$id";
+    final response = await http.get(Uri.parse(url));
+    print(url);
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      print("Solicitudes obtenidad: ${jsonData}");
+      setState(() {
+        asslist =
+            jsonData.map<Asesor>((item) => Asesor.fromJson(item)).toList();
+      });
+    } else {
+      print("Error al obtener la lista");
+    }
+  }
 }
 
 class ConditionalCircularImageWidget extends StatelessWidget {
