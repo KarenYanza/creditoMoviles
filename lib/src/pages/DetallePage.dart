@@ -194,7 +194,7 @@ class _DetallePageState extends State<DetallePage> {
                         },
                       );
                     },
-                    child: Text('Imprimir'),
+                    child: Text('Firmar'),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -381,45 +381,46 @@ class _DetallePageState extends State<DetallePage> {
       ),
     );
 
+    // Agrega la firma si existe
+    pw.ImageProvider? signatureImage;
+    if (_signatureController.isNotEmpty) {
+      final signatureBytes = await _signatureController.toPngBytes();
+      signatureImage = pw.MemoryImage(signatureBytes!);
+    }
+
+    // Agrega la firma al contenido del informe
+    if (signatureImage != null) {
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.SizedBox(height: 20),
+                pw.Text('Firma:'),
+                pw.Image(signatureImage!),
+              ],
+            );
+          },
+        ),
+      );
+    }
+
     // Guarda el informe en el dispositivo
     final output = await getApplicationDocumentsDirectory();
     final file = File('${output.path}/informe.pdf');
     await file.writeAsBytes(await pdf.save());
 
-    // Verifica los campos marcados como correctos o incorrectos
-    camposCorrectos.clear();
-    camposIncorrectos.clear();
-    for (var entry in checkStatus.entries) {
-      if (entry.value) {
-        camposCorrectos.add(entry.key);
-      } else {
-        camposIncorrectos.add(entry.key);
-      }
-    }
-
-    // Realiza acciones según los campos marcados
-    if (camposIncorrectos.isEmpty) {
-      // Todos los campos son correctos, enviar a una persona
-      // Lógica para enviar el documento con la firma a una persona
-      // ...
-      print('Enviar documento a una persona');
-    } else {
-      // Hay campos incorrectos, enviar a otra persona
-      // Lógica para enviar el documento con campos incorrectos a otra persona
-      // ...
-      print('Enviar documento con campos incorrectos a otra persona');
-    }
-
     // Imprime el informe
     await Printing.sharePdf(bytes: await pdf.save(), filename: 'informe.pdf');
   }
-
-  void _clearSignature() {
-    _signatureController.clear();
-  }
-
-  final SignatureController _signatureController = SignatureController(
-    penStrokeWidth: 2,
-    penColor: Colors.black,
-  );
 }
+
+void _clearSignature() {
+  _signatureController.clear();
+}
+
+final SignatureController _signatureController = SignatureController(
+  penStrokeWidth: 2,
+  penColor: Colors.black,
+);
