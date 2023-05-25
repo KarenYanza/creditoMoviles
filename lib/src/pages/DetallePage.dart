@@ -34,6 +34,8 @@ class DetallePage extends StatefulWidget {
 
 class _DetallePageState extends State<DetallePage> {
   List<AnexoCredito> anexosss = [];
+  List<String> camposCorrectos = [];
+  List<String> camposIncorrectos = [];
   @override
   void initState() {
     super.initState();
@@ -154,52 +156,43 @@ class _DetallePageState extends State<DetallePage> {
                     onPressed: () {
                       bool allChecked =
                           checkStatus.values.every((element) => element);
-                      if (allChecked) {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('Firma'),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('Por favor, firme a continuación:'),
-                                  SizedBox(height: 16),
-                                  Signature(
-                                    controller: _signatureController,
-                                    height: 200,
-                                    backgroundColor: Colors.white,
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text('Cancelar'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    _generateReport();
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text('Imprimir'),
+
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Firma'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('Por favor, firme a continuación:'),
+                                SizedBox(height: 16),
+                                Signature(
+                                  controller: _signatureController,
+                                  height: 200,
+                                  backgroundColor: Colors.white,
                                 ),
                               ],
-                            );
-                          },
-                        );
-                      } else {
-                        List<String> incorrectos = [];
-                        checkStatus.forEach((campo, correcto) {
-                          if (!correcto) {
-                            incorrectos.add(campo);
-                          }
-                        });
-                        print(
-                            'Hay campos incorrectos: ${incorrectos.join(", ")}');
-                      }
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _clearSignature();
+                                },
+                                child: Text('Cancelar'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  _generateReport();
+                                  Navigator.pop(context);
+                                },
+                                child: Text('Imprimir'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     },
                     child: Text('Imprimir'),
                   ),
@@ -363,10 +356,10 @@ class _DetallePageState extends State<DetallePage> {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('Id: 1'),
-              pw.Text('Nombre: John Doe'),
-              pw.Text('Fecha: 2023-05-24'),
-              pw.Text('Monto: \$1000'),
+              pw.Text('Id: ${widget.soliid}'),
+              pw.Text('Nombre: ${widget.nombres}'),
+              pw.Text('Fecha: ${widget.cred_fecha}'),
+              pw.Text('Monto: ${widget.cred_monto}'),
               pw.SizedBox(height: 20),
               pw.Text(
                 'Información adicional',
@@ -376,11 +369,10 @@ class _DetallePageState extends State<DetallePage> {
               pw.SizedBox(height: 20),
               pw.Table.fromTextArray(
                 context: context,
-                data: const <List<String>>[
+                data: [
                   ['Campo', 'Correcto'],
-                  ['Campo 1', 'Sí'],
-                  ['Campo 2', 'No'],
-                  ['Campo 3', 'Sí'],
+                  for (var entry in checkStatus.entries)
+                    [entry.key, entry.value ? 'Si' : 'No'],
                 ],
               ),
             ],
@@ -394,8 +386,36 @@ class _DetallePageState extends State<DetallePage> {
     final file = File('${output.path}/informe.pdf');
     await file.writeAsBytes(await pdf.save());
 
+    // Verifica los campos marcados como correctos o incorrectos
+    camposCorrectos.clear();
+    camposIncorrectos.clear();
+    for (var entry in checkStatus.entries) {
+      if (entry.value) {
+        camposCorrectos.add(entry.key);
+      } else {
+        camposIncorrectos.add(entry.key);
+      }
+    }
+
+    // Realiza acciones según los campos marcados
+    if (camposIncorrectos.isEmpty) {
+      // Todos los campos son correctos, enviar a una persona
+      // Lógica para enviar el documento con la firma a una persona
+      // ...
+      print('Enviar documento a una persona');
+    } else {
+      // Hay campos incorrectos, enviar a otra persona
+      // Lógica para enviar el documento con campos incorrectos a otra persona
+      // ...
+      print('Enviar documento con campos incorrectos a otra persona');
+    }
+
     // Imprime el informe
     await Printing.sharePdf(bytes: await pdf.save(), filename: 'informe.pdf');
+  }
+
+  void _clearSignature() {
+    _signatureController.clear();
   }
 
   final SignatureController _signatureController = SignatureController(
