@@ -6,11 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:moviles/Services/globals.dart';
 
 import 'package:moviles/models/usuario.dart';
+import 'package:moviles/sqlite/base.dart';
 import 'package:moviles/src/pages/PasswordResetPage.dart';
 import 'NavigationBar.dart';
 import 'NavigationBar1.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
+import 'package:local_auth/local_auth.dart';
+import 'package:connectivity/connectivity.dart';
 
 class LoginPage extends StatefulWidget {
   static String id = 'login_page';
@@ -28,6 +31,55 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
   String logoImage = 'images/logo.png';
   int failedAttempts = 0;
+  final LocalAuthentication _localAuthentication = LocalAuthentication();
+  bool _isFingerprintEnabled = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _checkFingerprintEnabled();
+  }
+
+  Future<void> _checkFingerprintEnabled() async {
+    bool hasFingerprint = await _localAuthentication.canCheckBiometrics;
+
+    setState(() {
+      _isFingerprintEnabled = hasFingerprint;
+    });
+  }
+
+  Future<void> _getSavedLogin() async {
+    final loginData = await DatabaseHelper.instance.getLogin();
+
+    if (loginData != null) {
+      _userController.text = loginData['username'];
+      _passwordController.text = loginData['password'];
+
+      var connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        print('No hay conexión a Internet');
+      } else {
+        obtenerUsuarioYLogin();
+      }
+    }
+  }
+
+  Future<void> _authenticateWithFingerprint() async {
+    bool isAuthenticated = false;
+
+    try {
+      isAuthenticated = await _localAuthentication.authenticate(
+        localizedReason: 'Please authenticate to log in',
+      );
+    } catch (e) {
+      print(e.toString());
+    }
+
+    if (isAuthenticated) {
+      _getSavedLogin();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +129,13 @@ class _LoginPageState extends State<LoginPage> {
                     height: 15.0,
                   ),
                   _buildRegisterButton(),
+                  if (_isFingerprintEnabled) ...[
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _authenticateWithFingerprint,
+                      child: Text('Iniciar Sesion Con Huella'),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -140,23 +199,24 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () {
         if (_formKey.currentState!.validate()) {
           bool userFound = false;
-          obtenerUsuarioYLogin(_userController.text, _passwordController.text);
+          obtenerUsuarioYLogin();
         }
       },
       child: Text('Iniciar sesión'),
     );
   }
 
-  Future<void> obtenerUsuarioYLogin(String username, String password) async {
+  Future<void> obtenerUsuarioYLogin() async {
     try {
-      String url = '${APIConfig.baseURL}usuarios/search/$username';
+      String url =
+          '${APIConfig.baseURL}usuarios/search/${_userController.text}';
       final response = await http.get(Uri.parse(url));
       //String domain = 'http://192.168.0.106:8080/api/usuarios/search/$username';
       //final response = await http.get(Uri.parse(domain));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         Usuario u = Usuario.fromJson(jsonResponse);
-        if (u.usua_password == password) {
+        if (u.usua_password == _passwordController.text) {
           // Usuario y contraseña coinciden
           if (u.rol.rol_id == 3) {
             // Administrador
@@ -179,6 +239,8 @@ class _LoginPageState extends State<LoginPage> {
               logoImage = 'images/logo.png';
             });
           }
+          await DatabaseHelper.instance.saveLogin(_userController.text,
+              _passwordController.text, _isFingerprintEnabled);
         } else {
           failedAttempts++; // Incrementar el contador de intentos fallidos
 
