@@ -83,19 +83,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    /*if (_loading) {
-      return Center(
-        child: Stack(
-          children: [
-            Lottie.network(
-                'https://assets6.lottiefiles.com/packages/lf20_C67qsN3hAk.json'),
-
-            //child: Lottie.asset('assets/loading.json'),
-          ],
-        ),
-      );
-    }*/
     return SafeArea(
+      child: WillPopScope(
+        onWillPop: () async {
+          // Bloquear el botón de retroceso
+          return false;
+        },
       child: Scaffold(
         body: Center(
           child: SingleChildScrollView(
@@ -141,6 +134,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

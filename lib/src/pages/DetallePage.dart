@@ -10,8 +10,11 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:signature/signature.dart';
 import 'package:printing/printing.dart';
 import '../../Services/globals.dart';
+import '../../models/usuario.dart';
 
 class DetallePage extends StatefulWidget {
+  final Usuario usuario;
+
   final int soliid;
   final String cred_fecha;
   final double cred_monto;
@@ -26,21 +29,26 @@ class DetallePage extends StatefulWidget {
       required this.soli_estado_registro,
       required this.usuario_username,
       required this.sucuid,
-      required this.nombres});
+      required this.nombres,
+      required this.usuario});
 
   @override
   _DetallePageState createState() => _DetallePageState();
 }
 
 class _DetallePageState extends State<DetallePage> {
+  late Usuario usuario;
   List<AnexoCredito> anexosss = [];
   List<String> camposCorrectos = [];
   List<String> camposIncorrectos = [];
+  
+  
   @override
   void initState() {
     super.initState();
     int id = widget.soliid;
     listarAnexos(id);
+    usuario = widget.usuario;
   }
 
   List<AnexoCredito> anexlist = [];
@@ -65,18 +73,41 @@ class _DetallePageState extends State<DetallePage> {
   @override
   Widget build(BuildContext context) {
     if (pdfPath != null) {
-      return Scaffold(
+      return WillPopScope(
+    onWillPop: () async {
+      return false; // Bloquea el botón de retroceso
+    },
+    child: Scaffold(
         appBar: AppBar(
           title: Text('Detalles'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(
+                  context); // Navegar hacia atrás al presionar el botón de retroceso
+            },
+          ),
         ),
         body: PDFView(
           filePath: pdfPath!,
         ),
+    ),
       );
     } else {
-      return Scaffold(
+      return WillPopScope(
+    onWillPop: () async {
+      return false; // Bloquea el botón de retroceso
+    },
+    child: Scaffold(
         appBar: AppBar(
           title: Text('Detalles'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(
+                  context); // Navegar hacia atrás al presionar el botón de retroceso
+            },
+          ),
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -207,6 +238,7 @@ class _DetallePageState extends State<DetallePage> {
             ],
           ),
         ),
+    ),
       );
     }
   }
@@ -326,6 +358,7 @@ class _DetallePageState extends State<DetallePage> {
         },
       );
     } else {
+      
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -347,7 +380,12 @@ class _DetallePageState extends State<DetallePage> {
   }
 
   Future<void> _generateReport() async {
+  if (_signatureController.isNotEmpty) {
     final pdf = pw.Document();
+
+    // Agrega la firma
+    final signatureBytes = await _signatureController.toPngBytes();
+    final signatureImage = pw.MemoryImage(signatureBytes!);
 
     // Agrega el contenido del informe
     pdf.addPage(
@@ -363,48 +401,27 @@ class _DetallePageState extends State<DetallePage> {
               pw.SizedBox(height: 20),
               pw.Text(
                 'Información adicional',
-                style:
-                    pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 20),
               pw.Table.fromTextArray(
                 context: context,
                 data: [
                   ['Campo', 'Correcto'],
-                  for (var entry in checkStatus.entries)
-                    [entry.key, entry.value ? 'Si' : 'No'],
+                  for (var entry in checkStatus.entries) [entry.key, entry.value ? 'Si' : 'No'],
                 ],
               ),
+              pw.SizedBox(height: 20),
+              pw.Text('Firma:'),
+              pw.Image(signatureImage),
+              pw.Text('Nombre:' + usuario.persona.pers_nombres + ' ' + usuario.persona.pers_apellidos),
+              pw.Text('Cedula:' + usuario.persona.pers_cedula),
+              pw.Text('Sucursal:' + usuario.sucursal.sucu_nombre),
             ],
           );
         },
       ),
     );
-
-    // Agrega la firma si existe
-    pw.ImageProvider? signatureImage;
-    if (_signatureController.isNotEmpty) {
-      final signatureBytes = await _signatureController.toPngBytes();
-      signatureImage = pw.MemoryImage(signatureBytes!);
-    }
-
-    // Agrega la firma al contenido del informe
-    if (signatureImage != null) {
-      pdf.addPage(
-        pw.Page(
-          build: (pw.Context context) {
-            return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.SizedBox(height: 20),
-                pw.Text('Firma:'),
-                pw.Image(signatureImage!),
-              ],
-            );
-          },
-        ),
-      );
-    }
 
     // Guarda el informe en el dispositivo
     final output = await getApplicationDocumentsDirectory();
@@ -413,7 +430,45 @@ class _DetallePageState extends State<DetallePage> {
 
     // Imprime el informe
     await Printing.sharePdf(bytes: await pdf.save(), filename: 'informe.pdf');
+  } else {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Firma'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Por favor, firme a continuación:'),
+              SizedBox(height: 16),
+              Signature(
+                controller: _signatureController,
+                height: 200,
+                backgroundColor: Colors.white,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _clearSignature();
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                _generateReport();
+                Navigator.pop(context);
+              },
+              child: Text('Imprimir'),
+            ),
+          ],
+        );
+      },
+    );
   }
+}
 }
 
 void _clearSignature() {
@@ -422,5 +477,5 @@ void _clearSignature() {
 
 final SignatureController _signatureController = SignatureController(
   penStrokeWidth: 2,
-  penColor: Colors.black,
+  penColor: Color.fromARGB(255, 37, 8, 223),
 );

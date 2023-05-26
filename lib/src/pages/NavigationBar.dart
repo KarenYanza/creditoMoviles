@@ -41,7 +41,12 @@ class _NextPageState extends State<NextPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        // Evitar que el usuario retroceda
+        return false;
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,6 +112,7 @@ class _NextPageState extends State<NextPage>
           _buildAprobadosScreen(),
           _buildRechazadosScreen(),
         ],
+      ),
       ),
     );
   }
@@ -228,6 +234,7 @@ class _NextPageState extends State<NextPage>
                           usuario_username: asesor.usuario_username,
                           sucuid: asesor.sucuid,
                           nombres: asesor.nombres,
+                          usuario: usuario,
                         ),
                       ),
                     );

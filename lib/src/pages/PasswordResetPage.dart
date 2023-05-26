@@ -29,100 +29,113 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Cambiar contraseña"),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: ConditionalCircularImageWidget(
-                      base64Image: logoImage,
-                      fallbackImage: 'images/logo.png',
-                      width: 100.0,
-                      height: 100.0,
+    return WillPopScope(
+      onWillPop: () async {
+        // Evitar que el usuario retroceda
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Cambiar contraseña"),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(
+                  context); // Navegar hacia atrás al presionar el botón de retroceso
+            },
+          ),
+        ),
+        body: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: ConditionalCircularImageWidget(
+                        base64Image: logoImage,
+                        fallbackImage: 'images/logo.png',
+                        width: 100.0,
+                        height: 100.0,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 16.0),
-                  Text(
-                    "Cambio de contraseña",
-                    style: TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                      height: 2.5,
+                    SizedBox(width: 16.0),
+                    Text(
+                      "Cambio de contraseña",
+                      style: TextStyle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.bold,
+                        height: 2.5,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16.0),
-              Column(
-                children: [
-                  Text(
-                    "Usuario",
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
+                  ],
+                ),
+                SizedBox(height: 16.0),
+                Column(
+                  children: [
+                    Text(
+                      "Usuario",
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  TextField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(),
-                    enabled: !_userFound,
-                  ),
-                  SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () => obtenerUsuario(_usernameController.text),
-                    child: Text("Buscar"),
-                  ),
-                  SizedBox(height: 16.0),
-                  if (_showVerification)
-                    Column(
-                      children: [
-                        Text(
-                          "¿Cuál es tu color favorito?",
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
+                    TextField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(),
+                      enabled: !_userFound,
+                    ),
+                    SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: () => obtenerUsuario(_usernameController.text),
+                      child: Text("Buscar"),
+                    ),
+                    SizedBox(height: 16.0),
+                    if (_showVerification)
+                      Column(
+                        children: [
+                          Text(
+                            "¿Cuál es tu color favorito?",
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        TextField(
-                          controller: _verificationController,
-                          decoration: InputDecoration(),
-                        ),
-                        SizedBox(height: 10.0),
-                        Text(
-                          "¿Cuál es el nombre de tu primera mascota? ",
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
+                          TextField(
+                            controller: _verificationController,
+                            decoration: InputDecoration(),
                           ),
-                        ),
-                        TextField(
-                          controller: _verification1Controller,
-                          decoration: InputDecoration(),
-                        ),
-                        SizedBox(height: 16.0),
-                        ElevatedButton(
-                          onPressed: () => login(
-                              _usernameController.text,
-                              _verificationController.text,
-                              _verification1Controller.text),
-                          child: Text("Verificar"),
-                        ),
-                      ],
-                    ),
-                  SizedBox(height: 16.0),
-                  Text(_responseMessage),
-                ],
-              ),
-            ],
+                          SizedBox(height: 10.0),
+                          Text(
+                            "¿Cuál es el nombre de tu primera mascota? ",
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextField(
+                            controller: _verification1Controller,
+                            decoration: InputDecoration(),
+                          ),
+                          SizedBox(height: 16.0),
+                          ElevatedButton(
+                            onPressed: () => login(
+                                _usernameController.text,
+                                _verificationController.text,
+                                _verification1Controller.text),
+                            child: Text("Verificar"),
+                          ),
+                        ],
+                      ),
+                    SizedBox(height: 16.0),
+                    Text(_responseMessage),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -262,6 +275,31 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Llenar todos los campos.'),
+                              ),
+                            );
+                          } else if (nuevaContrasena.length < 8) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'La contraseña debe tener al menos 8 caracteres.'),
+                              ),
+                            );
+                          } else if (!RegExp(r'[a-zA-Z]')
+                                  .hasMatch(nuevaContrasena) ||
+                              !RegExp(r'\d').hasMatch(nuevaContrasena) ||
+                              !RegExp(r'[!@#$%^&*(),.?":{}|<>]')
+                                  .hasMatch(nuevaContrasena)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'La contraseña debe contener letras, números y al menos un carácter especial.'),
+                              ),
+                            );
+                          } else if (nuevaContrasena !=
+                              confirmacionContrasena) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Las contraseñas no coinciden.'),
                               ),
                             );
                           } else {

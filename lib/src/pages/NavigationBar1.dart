@@ -32,7 +32,12 @@ class _NextPageState1 extends State<NextPage1>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        // Evitar que el usuario retroceda
+        return false;
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,6 +288,7 @@ class _NextPageState1 extends State<NextPage1>
             ],
           ),
         ),
+      ),
       ),
     );
   }
