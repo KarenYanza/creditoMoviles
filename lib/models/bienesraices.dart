@@ -1,5 +1,3 @@
-import 'solicitud.dart';
-
 class BienesRaices {
   final int bienRaic_id;
   final String bienRaic_tipo;

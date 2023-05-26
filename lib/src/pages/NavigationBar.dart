@@ -25,8 +25,8 @@ class _NextPageState extends State<NextPage>
   List<Tab> _tabs = [
     Tab(text: 'Todos'),
     Tab(text: 'Pendientes'),
-    Tab(text: 'Validados'),
-    Tab(text: 'Rechazados'),
+    Tab(text: 'Validadas'),
+    Tab(text: 'Rechazadas'),
   ];
 
   String _selectedEstado = 'Todos';
@@ -47,72 +47,72 @@ class _NextPageState extends State<NextPage>
         return false;
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bienvenido',
-              style: TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            SizedBox(height: 4), // Espacio entre los textos
-            Text(
-              '${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        appBar: AppBar(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Bienvenido',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              SizedBox(height: 4), // Espacio entre los textos
+              Text(
+                '${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: _tabs,
+          ),
+          automaticallyImplyLeading: false,
+          actions: [
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("Cerrar sesión"),
+                      content: Text("¿Está seguro de que desea cerrar sesión?"),
+                      actions: [
+                        TextButton(
+                          child: Text("Cancelar"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: Text("Aceptar"),
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(LoginPage.id);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ConditionalCircularImageWidget(
+                  base64Image: usuario.persona.pers_foto,
+                  fallbackImage: 'images/logo.png',
+                ),
+              ),
             ),
           ],
         ),
-        bottom: TabBar(
+        body: TabBarView(
           controller: _tabController,
-          tabs: _tabs,
+          children: [
+            _buildTodosScreen(),
+            _buildPendientesScreen(),
+            _buildAprobadosScreen(),
+            _buildRechazadosScreen(),
+          ],
         ),
-        automaticallyImplyLeading: false,
-        actions: [
-          GestureDetector(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text("Cerrar sesión"),
-                    content: Text("¿Está seguro de que desea cerrar sesión?"),
-                    actions: [
-                      TextButton(
-                        child: Text("Cancelar"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      TextButton(
-                        child: Text("Aceptar"),
-                        onPressed: () {
-                          Navigator.of(context).pushNamed(LoginPage.id);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ConditionalCircularImageWidget(
-                base64Image: usuario.persona.pers_foto,
-                fallbackImage: 'images/logo.png',
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildTodosScreen(),
-          _buildPendientesScreen(),
-          _buildAprobadosScreen(),
-          _buildRechazadosScreen(),
-        ],
-      ),
       ),
     );
   }
@@ -181,7 +181,7 @@ class _NextPageState extends State<NextPage>
 
   Widget _buildPendientesScreen() {
     List<Asesor> filteredList = asslist
-        .where((asesor) => asesor.soli_estado_registro == 'Registrado')
+        .where((asesor) => asesor.soli_estado_registro == 'Registrada')
         .toList();
 
     return Column(
@@ -264,7 +264,7 @@ class _NextPageState extends State<NextPage>
 
   Widget _buildAprobadosScreen() {
     List<Asesor> filteredList = asslist
-        .where((asesor) => asesor.soli_estado_registro == 'Validado')
+        .where((asesor) => asesor.soli_estado_registro == 'Validada')
         .toList();
 
     return Column(
@@ -330,7 +330,7 @@ class _NextPageState extends State<NextPage>
 
   Widget _buildRechazadosScreen() {
     List<Asesor> filteredList = asslist
-        .where((asesor) => asesor.soli_estado_registro == 'Rechazado')
+        .where((asesor) => asesor.soli_estado_registro == 'Rechazada')
         .toList();
 
     return Column(

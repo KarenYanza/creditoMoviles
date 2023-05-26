@@ -14,7 +14,6 @@ import '../../models/usuario.dart';
 
 class DetallePage extends StatefulWidget {
   final Usuario usuario;
-
   final int soliid;
   final String cred_fecha;
   final double cred_monto;
@@ -31,7 +30,6 @@ class DetallePage extends StatefulWidget {
       required this.sucuid,
       required this.nombres,
       required this.usuario});
-
   @override
   _DetallePageState createState() => _DetallePageState();
 }
@@ -41,8 +39,10 @@ class _DetallePageState extends State<DetallePage> {
   List<AnexoCredito> anexosss = [];
   List<String> camposCorrectos = [];
   List<String> camposIncorrectos = [];
-  
-  
+  List<String> camposNoaplica = [];
+  bool isButtonDisabled = false;
+  Map<String, String> respuestas = {};
+
   @override
   void initState() {
     super.initState();
@@ -67,183 +67,185 @@ class _DetallePageState extends State<DetallePage> {
     'Remesas': false,
     'Roles de pago': false,
   };
-
   String? pdfPath;
-
   @override
   Widget build(BuildContext context) {
     if (pdfPath != null) {
       return WillPopScope(
-    onWillPop: () async {
-      return false; // Bloquea el botón de retroceso
-    },
-    child: Scaffold(
-        appBar: AppBar(
-          title: Text('Detalles'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(
-                  context); // Navegar hacia atrás al presionar el botón de retroceso
-            },
+        onWillPop: () async {
+          return false; // Bloquea el botón de retroceso
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Detalles'),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(
+                    context); // Navegar hacia atrás al presionar el botón de retroceso
+              },
+            ),
+          ),
+          body: PDFView(
+            filePath: pdfPath!,
           ),
         ),
-        body: PDFView(
-          filePath: pdfPath!,
-        ),
-    ),
       );
     } else {
       return WillPopScope(
-    onWillPop: () async {
-      return false; // Bloquea el botón de retroceso
-    },
-    child: Scaffold(
-        appBar: AppBar(
-          title: Text('Detalles'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(
-                  context); // Navegar hacia atrás al presionar el botón de retroceso
-            },
+        onWillPop: () async {
+          return false; // Bloquea el botón de retroceso
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Detalles'),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(
+                    context); // Navegar hacia atrás al presionar el botón de retroceso
+              },
+            ),
           ),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Id: ${widget.soliid}'),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Nombre: ${widget.nombres}'),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Fecha: ${widget.cred_fecha}'),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Monto: ${widget.cred_monto}'),
-              ),
-              SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Información adicional',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Id: ${widget.soliid}'),
                 ),
-              ),
-              SizedBox(height: 20),
-              DataTable(
-                columns: [
-                  DataColumn(label: Text('Campo')),
-                  DataColumn(label: Text('PDF')),
-                  DataColumn(label: Text('Correcto')),
-                ],
-                rows: checkStatus.keys.isNotEmpty
-                    ? List.from(checkStatus.keys)
-                        .asMap()
-                        .map(
-                          (index, e) => MapEntry(
-                            index,
-                            DataRow(
-                              cells: [
-                                DataCell(Text(e)),
-                                DataCell(
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      downloadAndShowPdf(index);
-                                    },
-                                    child: Text('Descargar'),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Nombre: ${widget.nombres}'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Fecha: ${widget.cred_fecha}'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Monto: ${widget.cred_monto}'),
+                ),
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Información adicional',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(height: 20),
+                DataTable(
+                  columns: [
+                    DataColumn(label: Text('Campo')),
+                    DataColumn(label: Text('PDF')),
+                    DataColumn(label: Text('Correcto')),
+                  ],
+                  rows: checkStatus.keys.isNotEmpty
+                      ? List.from(checkStatus.keys)
+                          .asMap()
+                          .map(
+                            (index, e) => MapEntry(
+                              index,
+                              DataRow(
+                                cells: [
+                                  DataCell(Text(e)),
+                                  DataCell(
+                                    ElevatedButton(
+                                      onPressed: disabledDownloadButtons
+                                              .contains(index)
+                                          ? null
+                                          : () {
+                                              downloadAndShowPdf(index);
+                                            },
+                                      child: Text('Descargar'),
+                                    ),
                                   ),
-                                ),
-                                DataCell(
-                                  Checkbox(
-                                    value: checkStatus[e],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        checkStatus[e] = value!;
-                                      });
-                                    },
+                                  DataCell(
+                                    Checkbox(
+                                      value: checkStatus[e],
+                                      onChanged: disabledDownloadButtons
+                                              .contains(index)
+                                          ? null
+                                          : (value) {
+                                              setState(() {
+                                                checkStatus[e] = value!;
+                                              });
+                                            },
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        )
-                        .values
-                        .toList()
-                    : [],
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      bool allChecked =
-                          checkStatus.values.every((element) => element);
+                          )
+                          .values
+                          .toList()
+                      : [],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        bool allChecked =
+                            checkStatus.values.every((element) => element);
 
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('Firma'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('Por favor, firme a continuación:'),
-                                SizedBox(height: 16),
-                                Signature(
-                                  controller: _signatureController,
-                                  height: 200,
-                                  backgroundColor: Colors.white,
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Firma'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Por favor, firme a continuación:'),
+                                  SizedBox(height: 16),
+                                  Signature(
+                                    controller: _signatureController,
+                                    height: 200,
+                                    backgroundColor: Colors.white,
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _clearSignature();
+                                  },
+                                  child: Text('Cancelar'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    _generateReport();
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Imprimir'),
                                 ),
                               ],
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _clearSignature();
-                                },
-                                child: Text('Cancelar'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  _generateReport();
-                                  Navigator.pop(context);
-                                },
-                                child: Text('Imprimir'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    child: Text('Firmar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Todo Lógica para imprimir solo los campos correctos
-                    },
-                    child: Text('Subir documentos'),
-                  ),
-                ],
-              ),
-            ],
+                            );
+                          },
+                        );
+                      },
+                      child: Text('Firmar'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Todo Lógica para imprimir solo los campos correctos
+                      },
+                      child: Text('Subir documentos'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-    ),
       );
     }
   }
-
-  // Lista para almacenar los resultados de la consulta
 
   Future<void> listarAnexos(int id) async {
     print("ingresa");
@@ -259,112 +261,122 @@ class _DetallePageState extends State<DetallePage> {
             .toList();
         print(anexosss);
       });
-
-      // Realizar cualquier otra acción necesaria con la lista anexlist
-      // ...
     } else {
       print("Error al obtener la lista");
     }
   }
 
+  Set<int> disabledDownloadButtons = Set<int>();
   void downloadAndShowPdf(int index) async {
-    String? base64PDF;
+    if (anexosss.isNotEmpty) {
+      String? base64PDF;
+      switch (index) {
+        case 0:
+          base64PDF = anexosss[0].ane_cred_cedula_conyugue;
+          break;
+        case 1:
+          base64PDF = anexosss[0].ane_cred_cedula_solicitante;
+          break;
+        case 2:
+          base64PDF = anexosss[0].ane_cred_estado_tarjetas_credito;
+          break;
+        case 3:
+          base64PDF = anexosss[0].ane_cred_facturas_alimentacion;
+          break;
+        case 4:
+          base64PDF = anexosss[0].ane_cred_facturas_educacion;
+          break;
+        case 5:
+          base64PDF = anexosss[0].ane_cred_facturas_otros;
+          break;
+        case 6:
+          base64PDF = anexosss[0].ane_cred_facturas_salud;
+          break;
+        case 7:
+          base64PDF = anexosss[0].ane_cred_facturas_servicios;
+          break;
+        case 8:
+          base64PDF = anexosss[0].ane_cred_matriculas;
+          break;
+        case 9:
+          base64PDF = anexosss[0].ane_cred_predios;
+          break;
+        case 10:
+          base64PDF = anexosss[0].ane_cred_recibos_vivienda;
+          break;
+        case 11:
+          base64PDF = anexosss[0].ane_cred_remesas;
+          break;
+        case 12:
+          base64PDF = anexosss[0].ane_cred_roles_pago;
+          break;
+        default:
+          base64PDF = null;
+          break;
+      }
 
-    switch (index) {
-      case 0:
-        base64PDF = anexosss[0].ane_cred_cedula_conyugue;
-        break;
-      case 1:
-        base64PDF = anexosss[0].ane_cred_cedula_solicitante;
-        break;
-      case 2:
-        base64PDF = anexosss[0].ane_cred_estado_tarjetas_credito;
-        break;
-      case 3:
-        base64PDF = anexosss[0].ane_cred_facturas_alimentacion;
-        break;
-      case 4:
-        base64PDF = anexosss[0].ane_cred_facturas_educacion;
-        break;
-      case 5:
-        base64PDF = anexosss[0].ane_cred_facturas_otros;
-        break;
-      case 6:
-        base64PDF = anexosss[0].ane_cred_facturas_salud;
-        break;
-      case 7:
-        base64PDF = anexosss[0].ane_cred_facturas_servicios;
-        break;
-      case 8:
-        base64PDF = anexosss[0].ane_cred_matriculas;
-        break;
-      case 9:
-        base64PDF = anexosss[0].ane_cred_predios;
-        break;
-      case 10:
-        base64PDF = anexosss[0].ane_cred_recibos_vivienda;
-        break;
-      case 11:
-        base64PDF = anexosss[0].ane_cred_remesas;
-        break;
-      case 12:
-        base64PDF = anexosss[0].ane_cred_roles_pago;
-        break;
-      default:
-        base64PDF = null;
-        break;
-    }
-
-    if (base64PDF != null && base64PDF.isNotEmpty) {
-      // Decodificar el archivo PDF base64 a bytes
-      List<int> pdfBytes = base64Decode(base64PDF);
-
-      // Obtener el directorio temporal del dispositivo
-      Directory tempDir = await getTemporaryDirectory();
-
-      // Crear un archivo temporal para el PDF
-      File tempFile = File('${tempDir.path}/documento.pdf');
-
-      // Escribir los bytes del PDF en el archivo temporal
-      await tempFile.writeAsBytes(pdfBytes, flush: true);
-
-      // Obtener la ruta del archivo PDF descargado
-      String path = tempFile.path;
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('PDF'),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            content: Container(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.height * 0.8,
-              child: PDFView(
-                filePath: path,
+      if (base64PDF != null && base64PDF.isNotEmpty) {
+        List<int> pdfBytes = base64Decode(base64PDF);
+        Directory tempDir = await getTemporaryDirectory();
+        File tempFile = File('${tempDir.path}/documento.pdf');
+        await tempFile.writeAsBytes(pdfBytes, flush: true);
+        String path = tempFile.path;
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('PDF'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('Cerrar'),
+              content: Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: MediaQuery.of(context).size.height * 0.8,
+                child: PDFView(
+                  filePath: path,
+                ),
               ),
-            ],
-          );
-        },
-      );
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cerrar'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('No aplica'),
+              content: Text('El archivo no está disponible.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      disabledDownloadButtons.add(index);
+                      camposNoaplica.add(checkStatus.keys.elementAt(index));
+                    });
+                  },
+                  child: Text('Cerrar'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     } else {
-      
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('No aplica'),
-            content: Text('El archivo no está disponible.'),
+            title: Text('Error al cargar'),
+            content: Text('El archivo no se pudo descargar.'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -380,95 +392,97 @@ class _DetallePageState extends State<DetallePage> {
   }
 
   Future<void> _generateReport() async {
-  if (_signatureController.isNotEmpty) {
-    final pdf = pw.Document();
-
-    // Agrega la firma
-    final signatureBytes = await _signatureController.toPngBytes();
-    final signatureImage = pw.MemoryImage(signatureBytes!);
-
-    // Agrega el contenido del informe
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Id: ${widget.soliid}'),
-              pw.Text('Nombre: ${widget.nombres}'),
-              pw.Text('Fecha: ${widget.cred_fecha}'),
-              pw.Text('Monto: ${widget.cred_monto}'),
-              pw.SizedBox(height: 20),
-              pw.Text(
-                'Información adicional',
-                style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+    if (_signatureController.isNotEmpty) {
+      final pdf = pw.Document();
+      final signatureBytes = await _signatureController.toPngBytes();
+      final signatureImage = pw.MemoryImage(signatureBytes!);
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Id: ${widget.soliid}'),
+                pw.Text('Nombre: ${widget.nombres}'),
+                pw.Text('Fecha: ${widget.cred_fecha}'),
+                pw.Text('Monto: ${widget.cred_monto}'),
+                pw.SizedBox(height: 20),
+                pw.Text(
+                  'Información adicional',
+                  style: pw.TextStyle(
+                      fontSize: 18, fontWeight: pw.FontWeight.bold),
+                ),
+                pw.SizedBox(height: 20),
+                pw.Table.fromTextArray(
+                  context: context,
+                  data: [
+                    ['Campo', 'Si', 'No', 'No aplica'],
+                    for (var entry in checkStatus.entries)
+                      [
+                        entry.key,
+                        entry.value ? 'Si' : '',
+                        entry.value ? '' : 'No',
+                        camposNoaplica.contains(entry.key) ? 'No aplica' : '',
+                      ],
+                  ],
+                ),
+                pw.SizedBox(height: 20),
+                pw.Text('Firma:'),
+                pw.Image(signatureImage),
+                pw.Text('Nombre:' +
+                    usuario.persona.pers_nombres +
+                    ' ' +
+                    usuario.persona.pers_apellidos),
+                pw.Text('Cedula:' + usuario.persona.pers_cedula),
+                pw.Text('Sucursal:' + usuario.sucursal.sucu_nombre),
+              ],
+            );
+          },
+        ),
+      );
+      final output = await getApplicationDocumentsDirectory();
+      final file = File('${output.path}/informe.pdf');
+      await file.writeAsBytes(await pdf.save());
+      await Printing.sharePdf(bytes: await pdf.save(), filename: 'informe.pdf');
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Firma'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Por favor, firme a continuación:'),
+                SizedBox(height: 16),
+                Signature(
+                  controller: _signatureController,
+                  height: 200,
+                  backgroundColor: Colors.white,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _clearSignature();
+                },
+                child: Text('Cancelar'),
               ),
-              pw.SizedBox(height: 20),
-              pw.Table.fromTextArray(
-                context: context,
-                data: [
-                  ['Campo', 'Correcto'],
-                  for (var entry in checkStatus.entries) [entry.key, entry.value ? 'Si' : 'No'],
-                ],
+              TextButton(
+                onPressed: () {
+                  _generateReport();
+                  Navigator.pop(context);
+                },
+                child: Text('Imprimir'),
               ),
-              pw.SizedBox(height: 20),
-              pw.Text('Firma:'),
-              pw.Image(signatureImage),
-              pw.Text('Nombre:' + usuario.persona.pers_nombres + ' ' + usuario.persona.pers_apellidos),
-              pw.Text('Cedula:' + usuario.persona.pers_cedula),
-              pw.Text('Sucursal:' + usuario.sucursal.sucu_nombre),
             ],
           );
         },
-      ),
-    );
-
-    // Guarda el informe en el dispositivo
-    final output = await getApplicationDocumentsDirectory();
-    final file = File('${output.path}/informe.pdf');
-    await file.writeAsBytes(await pdf.save());
-
-    // Imprime el informe
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'informe.pdf');
-  } else {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Firma'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Por favor, firme a continuación:'),
-              SizedBox(height: 16),
-              Signature(
-                controller: _signatureController,
-                height: 200,
-                backgroundColor: Colors.white,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _clearSignature();
-              },
-              child: Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                _generateReport();
-                Navigator.pop(context);
-              },
-              child: Text('Imprimir'),
-            ),
-          ],
-        );
-      },
-    );
+      );
+    }
   }
-}
 }
 
 void _clearSignature() {
