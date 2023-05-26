@@ -247,6 +247,8 @@ class _DetallePageState extends State<DetallePage> {
     }
   }
 
+  Set<int> disabledDownloadButtons = Set<int>();
+
   Future<void> listarAnexos(int id) async {
     print("ingresa");
     String url = "${APIConfig.baseURL}anexoCredito/buscarAnexos/$id";
@@ -266,7 +268,6 @@ class _DetallePageState extends State<DetallePage> {
     }
   }
 
-  Set<int> disabledDownloadButtons = Set<int>();
   void downloadAndShowPdf(int index) async {
     if (anexosss.isNotEmpty) {
       String? base64PDF;
@@ -447,6 +448,14 @@ class _DetallePageState extends State<DetallePage> {
       final output = await getApplicationDocumentsDirectory();
       final file = File('${output.path}/informe.pdf');
       await file.writeAsBytes(await pdf.save());
+
+      // Convierte el PDF a base64
+      final pdfBytes = await file.readAsBytes();
+      final base64String = base64Encode(pdfBytes);
+
+      // Ahora puedes utilizar el base64String según tus necesidades
+      print('PDF en base64: $base64String');
+
       await Printing.sharePdf(bytes: await pdf.save(), filename: 'informe.pdf');
     } else {
       showDialog(
