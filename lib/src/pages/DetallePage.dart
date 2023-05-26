@@ -392,6 +392,13 @@ class _DetallePageState extends State<DetallePage> {
     }
   }
 
+  Future<String> pdfToBase64(File file) async {
+    final pdfBytes = await file.readAsBytes();
+    final base64String = base64Encode(pdfBytes);
+    print(base64String);
+    return base64String;
+  }
+
   Future<void> _generateReport() async {
     if (_signatureController.isNotEmpty) {
       final pdf = pw.Document();
@@ -445,16 +452,24 @@ class _DetallePageState extends State<DetallePage> {
           },
         ),
       );
+
+      /*
       final output = await getApplicationDocumentsDirectory();
       final file = File('${output.path}/informe.pdf');
       await file.writeAsBytes(await pdf.save());
 
       // Convierte el PDF a base64
       final pdfBytes = await file.readAsBytes();
-      final base64String = base64Encode(pdfBytes);
+      final base64String = base64Encode(pdfBytes);*/
+      final output = await getApplicationDocumentsDirectory();
+      final file = File('${output.path}/informe.pdf');
+      await file.writeAsBytes(await pdf.save());
 
-      // Ahora puedes utilizar el base64String según tus necesidades
-      print('PDF en base64: $base64String');
+// Convierte el PDF a base64
+      final base64String = await pdfToBase64(file);
+
+// Ahora puedes utilizar el base64String según tus necesidades
+      print(base64String);
 
       await Printing.sharePdf(bytes: await pdf.save(), filename: 'informe.pdf');
     } else {
