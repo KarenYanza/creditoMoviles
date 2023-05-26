@@ -420,8 +420,12 @@ class _DetallePageState extends State<DetallePage> {
                     for (var entry in checkStatus.entries)
                       [
                         entry.key,
-                        entry.value ? 'Si' : '',
-                        entry.value ? '' : 'No',
+                        camposNoaplica.contains(entry.key)
+                            ? ''
+                            : (entry.value ? 'Si' : ''),
+                        camposNoaplica.contains(entry.key)
+                            ? ''
+                            : (entry.value ? '' : 'No'),
                         camposNoaplica.contains(entry.key) ? 'No aplica' : '',
                       ],
                   ],
