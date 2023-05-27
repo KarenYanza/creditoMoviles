@@ -40,7 +40,6 @@ dependencies:
   path_provider: ^2.0.15
   dio: ^4.0.0
   connectivity: ^3.0.6
-  network_info_plus: ^4.0.1
   intranet_ip: ^1.0.0
   signature: ^5.3.0
   pdf: ^3.8.4
@@ -48,6 +47,7 @@ dependencies:
   local_auth: ^2.1.6
   sqflite: ^2.2.8+4
   path: ^1.8.3
+  file_picker: ^4.0.0
 
 dev_dependencies:
   flutter_test:

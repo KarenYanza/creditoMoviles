@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:moviles/models/anexocredito.dart';
+import 'package:moviles/src/pages/PdfViewerPage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:pdf/widgets.dart' as pw;
@@ -42,13 +44,17 @@ class _DetallePageState extends State<DetallePage> {
   List<String> camposNoaplica = [];
   bool isButtonDisabled = false;
   Map<String, String> respuestas = {};
-
+  int id = 0;
+  String? base64String;
+  String estado = '';
   @override
   void initState() {
     super.initState();
-    int id = widget.soliid;
+    id = widget.soliid;
     listarAnexos(id);
     usuario = widget.usuario;
+    print('este es el id');
+    print(id);
   }
 
   List<AnexoCredito> anexlist = [];
@@ -68,6 +74,7 @@ class _DetallePageState extends State<DetallePage> {
     'Roles de pago': false,
   };
   String? pdfPath;
+
   @override
   Widget build(BuildContext context) {
     if (pdfPath != null) {
@@ -189,9 +196,6 @@ class _DetallePageState extends State<DetallePage> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        bool allChecked =
-                            checkStatus.values.every((element) => element);
-
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
@@ -232,8 +236,40 @@ class _DetallePageState extends State<DetallePage> {
                       child: Text('Firmar'),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        // Todo Lógica para imprimir solo los campos correctos
+                      onPressed: () async {
+                        bool allChecked =
+                            checkStatus.values.every((element) => element);
+                        bool anyNoAplica = camposNoaplica.isNotEmpty;
+                        bool anyNo = checkStatus.values
+                            .any((element) => element == false);
+
+                        if (allChecked && !anyNoAplica) {
+                          // Todos los campos están marcados como "Sí"
+                          estado = 'Revisada';
+                        } else if (anyNo) {
+                          // Al menos un campo está marcado como "No"
+                          estado = 'Rechazada';
+                        } else {
+                          // Hay campos marcados como "No aplica"
+                          // Aquí puedes definir qué hacer en este caso
+                          estado = ''; // Estado indeterminado
+                        }
+                        print(estado);
+                        await actualizarEstado(
+                            id, estado); // Agregué el prefijo 'await'
+                        print(id);
+                        String filePath = await getFilePath();
+                        if (filePath.isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PdfViewerPage(
+                                filePath: filePath,
+                                soliid: id,
+                              ),
+                            ),
+                          );
+                        }
                       },
                       child: Text('Subir documentos'),
                     ),
@@ -248,6 +284,65 @@ class _DetallePageState extends State<DetallePage> {
   }
 
   Set<int> disabledDownloadButtons = Set<int>();
+
+  Future<void> actualizarEstado(int id, String estadoRegistro) async {
+    String url = '${APIConfig.baseURL}solicitud/actualizarEstado/$id';
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+
+    Map<String, dynamic> body = {
+      'estadoRegistro': estadoRegistro,
+    };
+
+    try {
+      var response = await http.put(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 201) {
+        // La solicitud se realizó con éxito
+        print('Estado actualizado exitosamente');
+      } else {
+        // Ocurrió un error en la solicitud
+        print('Error al actualizar el estado');
+      }
+    } catch (e) {
+      // Ocurrió un error de conexión
+      print('Error de conexión: $e');
+    }
+  }
+
+  Future<String> getFilePath() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null) {
+      return result.files.single.path!;
+    }
+
+    return '';
+  }
+
+  Future<void> actualizarListaVerificacion(int id, String base64String) async {
+    var url = Uri.parse(
+        '${APIConfig.baseURL}controlcredito/actualizarListaVerificacion/$id?ListaVerificacion=$base64String');
+    var headers = {'Content-Type': 'application/x-www-form-urlencoded'};
+    var body = {'ListaVerificacion': base64String};
+
+    var response = await http.put(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      print('Documento actualizado correctamente');
+    } else {
+      print('Error al actualizar el documento');
+    }
+  }
 
   Future<void> listarAnexos(int id) async {
     print("ingresa");
@@ -392,11 +487,15 @@ class _DetallePageState extends State<DetallePage> {
     }
   }
 
-  Future<String> pdfToBase64(File file) async {
-    final pdfBytes = await file.readAsBytes();
-    final base64String = base64Encode(pdfBytes);
-    print(base64String);
-    return base64String;
+  Future<String> pdfToBase64(String filePath) async {
+    File file = File(filePath);
+    if (await file.exists()) {
+      List<int> pdfBytes = await file.readAsBytes();
+      String base64String = base64Encode(pdfBytes);
+      return base64String;
+    } else {
+      throw Exception('El archivo PDF no existe en la ubicación especificada.');
+    }
   }
 
   Future<void> _generateReport() async {
@@ -410,6 +509,7 @@ class _DetallePageState extends State<DetallePage> {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
+                pw.Text('Estado: $estado'),
                 pw.Text('Id: ${widget.soliid}'),
                 pw.Text('Nombre: ${widget.nombres}'),
                 pw.Text('Fecha: ${widget.cred_fecha}'),
@@ -453,23 +553,15 @@ class _DetallePageState extends State<DetallePage> {
         ),
       );
 
-      /*
-      final output = await getApplicationDocumentsDirectory();
-      final file = File('${output.path}/informe.pdf');
-      await file.writeAsBytes(await pdf.save());
+      final tempPath = await getTemporaryDirectory();
+      final tempFilePath = '${tempPath.path}/informe.pdf';
+      final File tempFile = File(tempFilePath);
+      await tempFile.writeAsBytes(await pdf.save());
 
-      // Convierte el PDF a base64
-      final pdfBytes = await file.readAsBytes();
-      final base64String = base64Encode(pdfBytes);*/
-      final output = await getApplicationDocumentsDirectory();
-      final file = File('${output.path}/informe.pdf');
-      await file.writeAsBytes(await pdf.save());
-
-// Convierte el PDF a base64
-      final base64String = await pdfToBase64(file);
-
-// Ahora puedes utilizar el base64String según tus necesidades
+      final base64String = await pdfToBase64(tempFilePath);
+      print('base 64');
       print(base64String);
+      String base = base64String;
 
       await Printing.sharePdf(bytes: await pdf.save(), filename: 'informe.pdf');
     } else {
