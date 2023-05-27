@@ -247,10 +247,14 @@ class _DetallePageState extends State<DetallePage> {
 
                         if (allChecked || anyNoAplica) {
                           // Todos los campos están marcados como "Sí"
-                          estado = 'Validada';
+                          setState(() {
+                            estado = 'Validada';
+                          });
                         } else if (anyNo) {
                           // Al menos un campo está marcado como "No"
-                          estado = 'Rechazada';
+                          setState(() {
+                            estado = 'Rechazada';
+                          });
                         }
                         print(estado);
                         await actualizarEstado(
