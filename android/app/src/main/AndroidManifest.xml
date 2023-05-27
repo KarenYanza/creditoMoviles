@@ -7,7 +7,7 @@
 
 
    <application
-        android:label="Banco"
+        android:label="SU BANCO MOVIL"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

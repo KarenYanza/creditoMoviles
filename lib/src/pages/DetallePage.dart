@@ -3,11 +3,13 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:moviles/models/anexocredito.dart';
 import 'package:moviles/src/pages/PdfViewerPage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:signature/signature.dart';
 import 'package:printing/printing.dart';
@@ -243,16 +245,12 @@ class _DetallePageState extends State<DetallePage> {
                         bool anyNo = checkStatus.values
                             .any((element) => element == false);
 
-                        if (allChecked && !anyNoAplica) {
+                        if (allChecked || anyNoAplica) {
                           // Todos los campos están marcados como "Sí"
                           estado = 'Validada';
                         } else if (anyNo) {
                           // Al menos un campo está marcado como "No"
                           estado = 'Rechazada';
-                        } else {
-                          // Hay campos marcados como "No aplica"
-                          // Aquí puedes definir qué hacer en este caso
-                          estado = ''; // Estado indeterminado
                         }
                         print(estado);
                         await actualizarEstado(
@@ -501,14 +499,42 @@ class _DetallePageState extends State<DetallePage> {
   Future<void> _generateReport() async {
     if (_signatureController.isNotEmpty) {
       final pdf = pw.Document();
+
+      // Obtener la imagen de la firma
       final signatureBytes = await _signatureController.toPngBytes();
       final signatureImage = pw.MemoryImage(signatureBytes!);
+
+      // Agregar la imagen de encabezado
+      final headerImage = pw.MemoryImage(
+        (await rootBundle.load('images/logo.png')).buffer.asUint8List(),
+      );
+
       pdf.addPage(
         pw.Page(
           build: (pw.Context context) {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
+                pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    pw.Container(
+                      child: pw.Image(headerImage),
+                      alignment: pw.Alignment.center,
+                      width: 50,
+                    ),
+                    pw.SizedBox(width: 10),
+                    pw.Text(
+                      'SU BANCO',
+                      style: pw.TextStyle(
+                        color: PdfColors.blueGrey900,
+                        fontSize: 20,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                pw.SizedBox(height: 20),
                 pw.Text('Estado: $estado'),
                 pw.Text('Id: ${widget.soliid}'),
                 pw.Text('Nombre: ${widget.nombres}'),
@@ -540,13 +566,11 @@ class _DetallePageState extends State<DetallePage> {
                 ),
                 pw.SizedBox(height: 20),
                 pw.Text('Firma:'),
-                pw.Image(signatureImage),
-                pw.Text('Nombre:' +
-                    usuario.persona.pers_nombres +
-                    ' ' +
-                    usuario.persona.pers_apellidos),
-                pw.Text('Cedula:' + usuario.persona.pers_cedula),
-                pw.Text('Sucursal:' + usuario.sucursal.sucu_nombre),
+                pw.Image(signatureImage, width: 100),
+                pw.Text(
+                    'Nombre: ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}'),
+                pw.Text('Cedula: ${usuario.persona.pers_cedula}'),
+                pw.Text('Sucursal: ${usuario.sucursal.sucu_nombre}'),
               ],
             );
           },
