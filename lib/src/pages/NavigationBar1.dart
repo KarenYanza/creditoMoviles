@@ -200,23 +200,32 @@ class _NextPageState1 extends State<NextPage1>
                                         .toLowerCase();
                                     IconData icono = Icons.sentiment_satisfied;
                                     Color colorBarra = Colors.blue;
+                                    Color caracolor = Colors.black;
                                     double valorProgreso = 1.0;
 
                                     if (estadoRegistro == 'registrada') {
-                                      icono = Icons.sentiment_satisfied;
+                                      icono = Icons.sentiment_very_satisfied;
+                                      caracolor =
+                                          Color.fromARGB(255, 105, 137, 163);
                                       colorBarra =
                                           Color.fromARGB(255, 105, 137, 163);
                                       valorProgreso = 0.1;
                                     } else if (estadoRegistro == 'validada') {
-                                      icono = Icons.sentiment_neutral;
+                                      icono = Icons
+                                          .sentiment_very_satisfied_rounded;
+                                      caracolor = Colors.yellow;
                                       colorBarra = Colors.yellow;
                                       valorProgreso = 0.5;
                                     } else if (estadoRegistro == 'aprobada') {
-                                      icono = Icons.sentiment_satisfied_alt;
+                                      icono =
+                                          Icons.sentiment_very_satisfied_sharp;
+                                      caracolor = Colors.green;
                                       colorBarra = Colors.green;
                                       valorProgreso = 1.0;
                                     } else if (estadoRegistro == 'rechazada') {
-                                      icono = Icons.sentiment_dissatisfied;
+                                      icono =
+                                          Icons.sentiment_dissatisfied_rounded;
+                                      caracolor = Colors.red;
                                       colorBarra = Colors.red;
                                       valorProgreso = 1.0;
                                     }
@@ -236,7 +245,11 @@ class _NextPageState1 extends State<NextPage1>
                                           SizedBox(height: 20),
                                           Row(
                                             children: [
-                                              Icon(icono, size: 40),
+                                              Icon(
+                                                icono,
+                                                size: 40,
+                                                color: caracolor,
+                                              ),
                                               SizedBox(width: 20),
                                               Expanded(
                                                 child: LinearProgressIndicator(
