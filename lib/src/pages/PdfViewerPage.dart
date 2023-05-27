@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:http/http.dart' as http;
+import 'package:moviles/Services/globals.dart';
 import 'package:moviles/src/pages/NavigationBar.dart';
 import '../../models/usuario.dart';
 import 'NavigationBar1.dart';
@@ -64,8 +65,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => NextPage(usuario: usuario)
-                  ),
+                      builder: (context) => NextPage(usuario: usuario)),
                 );
                 // Subir el PDF utilizando base64PDF o bytesPDF
                 // print('PDF convertido en base64: $base64PDF');
@@ -84,11 +84,13 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       var request = http.MultipartRequest(
         'PUT',
         Uri.parse(
-            'http://192.168.0.106:8080/api/controlcredito/actualizarListaVerificacion/7'),
+            '${APIConfig.baseURL}controlcredito/actualizarListaVerificacion/$id'),
       );
 
       var file = await http.MultipartFile.fromPath('file', filePath);
       request.files.add(file);
+
+      request.headers['Authorization'] = 'Bearer ${APIConfig.authtoken}';
 
       var response = await request.send();
 

@@ -33,6 +33,7 @@ class _LoginPageState extends State<LoginPage> {
   int failedAttempts = 0;
   final LocalAuthentication _localAuthentication = LocalAuthentication();
   bool _isFingerprintEnabled = false;
+  String tokens = "";
 
   @override
   void initState() {
@@ -89,52 +90,52 @@ class _LoginPageState extends State<LoginPage> {
           // Bloquear el botón de retroceso
           return false;
         },
-      child: Scaffold(
-        body: Center(
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: ConditionalCircularImageWidget(
-                      base64Image: logoImage,
-                      fallbackImage: 'images/logo.png',
-                      width: 300.0,
-                      height: 300.0,
+        child: Scaffold(
+          body: Center(
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: ConditionalCircularImageWidget(
+                        base64Image: logoImage,
+                        fallbackImage: 'images/logo.png',
+                        width: 300.0,
+                        height: 300.0,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  _buildUserFormField(),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  _buildPasswordFormField(),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  _buildLoginButton(),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  _buildRegisterButton(),
-                  if (_isFingerprintEnabled) ...[
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _authenticateWithFingerprint,
-                      child: Text('Iniciar Sesion Con Huella'),
+                    SizedBox(
+                      height: 15.0,
                     ),
+                    _buildUserFormField(),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    _buildPasswordFormField(),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    _buildLoginButton(),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    _buildRegisterButton(),
+                    if (_isFingerprintEnabled) ...[
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _authenticateWithFingerprint,
+                        child: Text('Iniciar Sesion Con Huella'),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -200,7 +201,35 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<void> generarToken(String username, String password) async {
+    final url = Uri.parse('${APIConfig.baseURLlogin}generate-token');
+    print(url);
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({
+      'username': username,
+      'password': password,
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final token = jsonResponse['token'] as String;
+        setState(() {
+          APIConfig.authtoken = token;
+        });
+        print(token);
+      } else {
+        print('Error al generar el token ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error de conexión: $e');
+    }
+  }
+
   Future<void> obtenerUsuarioYLogin() async {
+    generarToken(_userController.text, _passwordController.text);
     try {
       String url =
           '${APIConfig.baseURL}usuarios/search/${_userController.text}';

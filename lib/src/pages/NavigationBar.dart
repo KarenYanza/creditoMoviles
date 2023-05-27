@@ -87,6 +87,9 @@ class _NextPageState extends State<NextPage>
                           child: Text("Aceptar"),
                           onPressed: () {
                             Navigator.of(context).pushNamed(LoginPage.id);
+                            setState(() {
+                              APIConfig.authtoken = "";
+                            });
                           },
                         ),
                       ],
@@ -395,19 +398,26 @@ class _NextPageState extends State<NextPage>
   }
 
   Future<void> listarSolicitudesUsername(int id) async {
-    print("ingresa");
     String url = "${APIConfig.baseURL}solicitud/listarSolicitudesSucursal/$id";
-    final response = await http.get(Uri.parse(url));
-    print(url);
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      print("Solicitudes obtenidad: ${jsonData}");
-      setState(() {
-        asslist =
-            jsonData.map<Asesor>((item) => Asesor.fromJson(item)).toList();
+
+    try {
+      final response = await http.get(Uri.parse(url), headers: {
+        'Authorization': 'Bearer ${APIConfig.authtoken}',
       });
-    } else {
-      print("Error al obtener la lista");
+      print(url);
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        print("Solicitudes obtenidas: $jsonData");
+        setState(() {
+          asslist =
+              jsonData.map<Asesor>((item) => Asesor.fromJson(item)).toList();
+        });
+      } else {
+        print("Error al obtener la lista");
+      }
+    } catch (e) {
+      print("Error de conexión: $e");
     }
   }
 }

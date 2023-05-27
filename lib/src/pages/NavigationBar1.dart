@@ -74,6 +74,9 @@ class _NextPageState1 extends State<NextPage1>
                           child: Text("Aceptar"),
                           onPressed: () {
                             Navigator.of(context).pushNamed(LoginPage.id);
+                            setState(() {
+                              APIConfig.authtoken = "";
+                            });
                           },
                         ),
                       ],
@@ -297,7 +300,9 @@ class _NextPageState1 extends State<NextPage1>
     print("ingresa");
     String url =
         "${APIConfig.baseURL}solicitud/listarSolicitudesUsername/$username";
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(Uri.parse(url), headers: {
+      'Authorization': 'Bearer ${APIConfig.authtoken}',
+    });
     print(url);
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
@@ -308,7 +313,7 @@ class _NextPageState1 extends State<NextPage1>
             .toList();
       });
     } else {
-      print("Error al obtener la lista");
+      print("Error al obtener la lista ${response.statusCode}");
     }
   }
 }

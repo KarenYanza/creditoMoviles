@@ -66,7 +66,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                     Text(
                       "Cambio de contraseña",
                       style: TextStyle(
-                        fontSize: 24.0,
+                        fontSize: 20.0,
                         fontWeight: FontWeight.bold,
                         height: 2.5,
                       ),
@@ -145,7 +145,9 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   Future<void> obtenerUsuario(String username) async {
     try {
       String url = "${APIConfig.baseURL}usuarios/search/$username";
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url), headers: {
+        'Authorization': 'Bearer ${APIConfig.authtoken}',
+      });
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         Usuario u = Usuario.fromJson(jsonResponse);
@@ -188,7 +190,9 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
     try {
       String url =
           "${APIConfig.baseURL}usuarios/restablecerC/$username/$preguntaUno/$preguntaDos";
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url), headers: {
+        'Authorization': 'Bearer ${APIConfig.authtoken}',
+      });
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         Usuario u = Usuario.fromJson(jsonResponse);
@@ -307,7 +311,10 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                               var url = Uri.parse(
                                   '${APIConfig.baseURL}usuarios/restablecer/$id?password=$nuevaContrasena');
                               print(url);
-                              var response = await http.put(url);
+                              var response = await http.put(url, headers: {
+                                'Authorization':
+                                    'Bearer ${APIConfig.authtoken}',
+                              });
                               print(response.statusCode);
                               if (response.statusCode == 201) {
                                 Navigator.of(context).pushNamed(LoginPage.id);

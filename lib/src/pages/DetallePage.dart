@@ -292,6 +292,7 @@ class _DetallePageState extends State<DetallePage> {
     print(url);
     Map<String, String> headers = {
       'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${APIConfig.authtoken}',
     };
 
     try {
@@ -326,7 +327,10 @@ class _DetallePageState extends State<DetallePage> {
   Future<void> actualizarListaVerificacion(int id, String base64String) async {
     var url = Uri.parse(
         '${APIConfig.baseURL}controlcredito/actualizarListaVerificacion/$id?ListaVerificacion=$base64String');
-    var headers = {'Content-Type': 'application/x-www-form-urlencoded'};
+    var headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Bearer ${APIConfig.authtoken}',
+    };
     var body = {'ListaVerificacion': base64String};
 
     var response = await http.put(url, headers: headers, body: body);
@@ -341,7 +345,9 @@ class _DetallePageState extends State<DetallePage> {
   Future<void> listarAnexos(int id) async {
     print("ingresa");
     String url = "${APIConfig.baseURL}anexoCredito/buscarAnexos/$id";
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(Uri.parse(url), headers: {
+      'Authorization': 'Bearer ${APIConfig.authtoken}',
+    });
     print(url);
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
