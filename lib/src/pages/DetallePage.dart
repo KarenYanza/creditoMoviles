@@ -245,7 +245,7 @@ class _DetallePageState extends State<DetallePage> {
 
                         if (allChecked && !anyNoAplica) {
                           // Todos los campos están marcados como "Sí"
-                          estado = 'Revisada';
+                          estado = 'Validada';
                         } else if (anyNo) {
                           // Al menos un campo está marcado como "No"
                           estado = 'Rechazada';
@@ -257,7 +257,7 @@ class _DetallePageState extends State<DetallePage> {
                         print(estado);
                         await actualizarEstado(
                             id, estado); // Agregué el prefijo 'await'
-                        print(id);
+                        print(estado);
                         String filePath = await getFilePath();
                         if (filePath.isNotEmpty) {
                           Navigator.push(
@@ -266,6 +266,7 @@ class _DetallePageState extends State<DetallePage> {
                               builder: (context) => PdfViewerPage(
                                 filePath: filePath,
                                 soliid: id,
+                                usuario: usuario,
                               ),
                             ),
                           );
@@ -286,29 +287,22 @@ class _DetallePageState extends State<DetallePage> {
   Set<int> disabledDownloadButtons = Set<int>();
 
   Future<void> actualizarEstado(int id, String estadoRegistro) async {
-    String url = '${APIConfig.baseURL}solicitud/actualizarEstado/$id';
-
+    String url =
+        '${APIConfig.baseURL}solicitud/actualizarEstado/$id?estadoRegistro=$estadoRegistro';
+    print(url);
     Map<String, String> headers = {
       'Content-Type': 'application/json',
     };
 
-    Map<String, dynamic> body = {
-      'estadoRegistro': estadoRegistro,
-    };
-
     try {
-      var response = await http.put(
-        Uri.parse(url),
-        headers: headers,
-        body: jsonEncode(body),
-      );
-
+      var response = await http.put(Uri.parse(url), headers: headers);
+      print(response.statusCode);
       if (response.statusCode == 201) {
         // La solicitud se realizó con éxito
         print('Estado actualizado exitosamente');
       } else {
         // Ocurrió un error en la solicitud
-        print('Error al actualizar el estado');
+        print('Error al actualizar el estado ');
       }
     } catch (e) {
       // Ocurrió un error de conexión

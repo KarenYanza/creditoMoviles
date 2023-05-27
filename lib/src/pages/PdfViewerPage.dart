@@ -2,19 +2,17 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:moviles/models/usuario.dart';
-
-import '../../Services/globals.dart';
+import 'package:moviles/src/pages/NavigationBar.dart';
+import '../../models/usuario.dart';
 import 'NavigationBar1.dart';
 
 class PdfViewerPage extends StatefulWidget {
+  final Usuario usuario;
   final int soliid;
   final String filePath;
-  late Usuario usuario;
-
-  PdfViewerPage({required this.soliid, required this.filePath});
+  PdfViewerPage(
+      {required this.soliid, required this.filePath, required this.usuario});
 
   @override
   _PdfViewerPageState createState() => _PdfViewerPageState();
@@ -23,6 +21,7 @@ class PdfViewerPage extends StatefulWidget {
 class _PdfViewerPageState extends State<PdfViewerPage> {
   String base64PDF = '';
   List<int>? bytesPDF;
+  late Usuario usuario;
 
   Future<void> convertToBase64AndBytes() async {
     File file = File(widget.filePath);
@@ -40,6 +39,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   void initState() {
     super.initState();
     id = widget.soliid;
+    usuario = widget.usuario;
     convertToBase64AndBytes();
   }
 
@@ -61,12 +61,12 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
               // Aquí puedes realizar la lógica para subir el PDF a la base de datos
               if (base64PDF.isNotEmpty && bytesPDF != null) {
                 subirPDF(widget.filePath, widget.soliid);
-                /*Navigator.push(
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => NextPage1(),
+                    builder: (context) => NextPage(usuario: usuario)
                   ),
-                );*/
+                );
                 // Subir el PDF utilizando base64PDF o bytesPDF
                 // print('PDF convertido en base64: $base64PDF');
                 print('PDF convertido en bytes: $bytesPDF');
