@@ -15,6 +15,10 @@ import 'package:signature/signature.dart';
 import 'package:printing/printing.dart';
 import '../../Services/globals.dart';
 import '../../models/usuario.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class DetallePage extends StatefulWidget {
   final Usuario usuario;
@@ -25,6 +29,7 @@ class DetallePage extends StatefulWidget {
   final String usuario_username;
   final int sucuid;
   final String nombres;
+  final String correo_username;
   DetallePage(
       {required this.soliid,
       required this.cred_fecha,
@@ -33,6 +38,7 @@ class DetallePage extends StatefulWidget {
       required this.usuario_username,
       required this.sucuid,
       required this.nombres,
+      required this.correo_username,
       required this.usuario});
   @override
   _DetallePageState createState() => _DetallePageState();
@@ -49,12 +55,14 @@ class _DetallePageState extends State<DetallePage> {
   int id = 0;
   String? base64String;
   String estado = '';
+  String usu = '';
   @override
   void initState() {
     super.initState();
     id = widget.soliid;
     listarAnexos(id);
     usuario = widget.usuario;
+
     print('este es el id');
     print(id);
   }
@@ -225,6 +233,27 @@ class _DetallePageState extends State<DetallePage> {
                                 ),
                                 TextButton(
                                   onPressed: () {
+                                    bool allChecked = checkStatus.values
+                                        .every((element) => element);
+                                    bool anyNoAplica =
+                                        camposNoaplica.isNotEmpty;
+                                    bool anyNo = checkStatus.values
+                                        .any((element) => element == false);
+
+                                    if (allChecked || anyNoAplica) {
+                                      // Todos los campos están marcados como "Sí"
+                                      setState(() {
+                                        estado = 'Validada';
+                                      });
+                                    } else if (anyNo) {
+                                      // Al menos un campo está marcado como "No"
+                                      setState(() {
+                                        estado = 'Rechazada';
+                                      });
+                                    }
+                                    actualizarEstado(id,
+                                        estado); // Agregué el prefijo 'await'
+                                    print(estado);
                                     _generateReport();
                                     Navigator.pop(context);
                                   },
@@ -239,27 +268,6 @@ class _DetallePageState extends State<DetallePage> {
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        bool allChecked =
-                            checkStatus.values.every((element) => element);
-                        bool anyNoAplica = camposNoaplica.isNotEmpty;
-                        bool anyNo = checkStatus.values
-                            .any((element) => element == false);
-
-                        if (allChecked || anyNoAplica) {
-                          // Todos los campos están marcados como "Sí"
-                          setState(() {
-                            estado = 'Validada';
-                          });
-                        } else if (anyNo) {
-                          // Al menos un campo está marcado como "No"
-                          setState(() {
-                            estado = 'Rechazada';
-                          });
-                        }
-                        print(estado);
-                        await actualizarEstado(
-                            id, estado); // Agregué el prefijo 'await'
-                        print(estado);
                         String filePath = await getFilePath();
                         if (filePath.isNotEmpty) {
                           Navigator.push(
@@ -291,7 +299,6 @@ class _DetallePageState extends State<DetallePage> {
   Future<void> actualizarEstado(int id, String estadoRegistro) async {
     String url =
         '${APIConfig.baseURL}solicitud/actualizarEstado/$id?estadoRegistro=$estadoRegistro';
-    print(url);
     Map<String, String> headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${APIConfig.authtoken}',
@@ -620,6 +627,25 @@ class _DetallePageState extends State<DetallePage> {
               ),
               TextButton(
                 onPressed: () {
+                  bool allChecked =
+                      checkStatus.values.every((element) => element);
+                  bool anyNoAplica = camposNoaplica.isNotEmpty;
+                  bool anyNo =
+                      checkStatus.values.any((element) => element == false);
+
+                  if (allChecked || anyNoAplica) {
+                    // Todos los campos están marcados como "Sí"
+                    setState(() {
+                      estado = 'Validada';
+                    });
+                  } else if (anyNo) {
+                    // Al menos un campo está marcado como "No"
+                    setState(() {
+                      estado = 'Rechazada';
+                    });
+                  }
+                  actualizarEstado(id, estado); // Agregué el prefijo 'await'
+                  print(estado);
                   _generateReport();
                   Navigator.pop(context);
                 },
@@ -631,13 +657,13 @@ class _DetallePageState extends State<DetallePage> {
       );
     }
   }
-}
 
-void _clearSignature() {
-  _signatureController.clear();
-}
+  void _clearSignature() {
+    _signatureController.clear();
+  }
 
-final SignatureController _signatureController = SignatureController(
-  penStrokeWidth: 2,
-  penColor: Color.fromARGB(255, 37, 8, 223),
-);
+  final SignatureController _signatureController = SignatureController(
+    penStrokeWidth: 2,
+    penColor: Color.fromARGB(255, 37, 8, 223),
+  );
+}

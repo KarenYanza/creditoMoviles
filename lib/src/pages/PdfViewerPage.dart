@@ -81,12 +81,11 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   Future<void> subirPDF(String filePath, int id) async {
     try {
-      var request = http.MultipartRequest(
-        'PUT',
-        Uri.parse(
-            '${APIConfig.baseURL}controlcredito/actualizarListaVerificacion/$id'),
-      );
+      var url = Uri.parse(
+          '${APIConfig.baseURL}controlcredito/actualizarListaVerificacion/$id');
 
+      var request = http.MultipartRequest('PUT', url);
+      print(url);
       var file = await http.MultipartFile.fromPath('file', filePath);
       request.files.add(file);
 

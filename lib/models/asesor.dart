@@ -6,6 +6,7 @@ class Asesor {
   final String usuario_username;
   final int sucuid;
   final String nombres;
+  final String correo_username;
   Asesor(
       {required this.soliid,
       required this.cred_fecha,
@@ -13,7 +14,8 @@ class Asesor {
       required this.soli_estado_registro,
       required this.usuario_username,
       required this.sucuid,
-      required this.nombres});
+      required this.nombres,
+      required this.correo_username});
 
   factory Asesor.fromJson(Map<String, dynamic> json) {
     return Asesor(
@@ -24,6 +26,7 @@ class Asesor {
       usuario_username: json['usuario_username'] ?? '',
       sucuid: json['sucuid'] ?? 0,
       nombres: json['nombres'] ?? '',
+      correo_username: json['pers_correo'] ?? '',
     );
   }
 }

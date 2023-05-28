@@ -237,6 +237,7 @@ class _NextPageState extends State<NextPage>
                           usuario_username: asesor.usuario_username,
                           sucuid: asesor.sucuid,
                           nombres: asesor.nombres,
+                          correo_username: asesor.correo_username, 
                           usuario: usuario,
                         ),
                       ),
