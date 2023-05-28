@@ -239,20 +239,23 @@ class _DetallePageState extends State<DetallePage> {
                                         camposNoaplica.isNotEmpty;
                                     bool anyNo = checkStatus.values
                                         .any((element) => element == false);
-
-                                    if (allChecked || anyNoAplica) {
-                                      // Todos los campos están marcados como "Sí"
-                                      setState(() {
-                                        estado = 'Validada';
-                                      });
-                                    } else if (anyNo) {
-                                      // Al menos un campo está marcado como "No"
+                                    if (allChecked) {
+                                      if (anyNoAplica == false ||
+                                          anyNoAplica == true) {
+                                        setState(() {
+                                          estado = 'Validada';
+                                        });
+                                      } else {
+                                        setState(() {
+                                          estado = 'Rechazada';
+                                        });
+                                      }
+                                    } else {
                                       setState(() {
                                         estado = 'Rechazada';
                                       });
                                     }
-                                    actualizarEstado(id,
-                                        estado); // Agregué el prefijo 'await'
+                                    actualizarEstado(id, estado);
                                     print(estado);
                                     _generateReport();
                                     Navigator.pop(context);
@@ -279,6 +282,13 @@ class _DetallePageState extends State<DetallePage> {
                                 usuario: usuario,
                               ),
                             ),
+                          );
+                        }
+                        if (estado == 'Rechazada') {
+                          sendEmailFile(
+                            widget.correo_username,
+                            'Rechazo Solicitud',
+                            'Estimad@ ${widget.nombres}, adjunto el detalle de su solicitud de credito.  Lamentablemente, luego de un exhaustivo análisis de la información proporcionada, no podemos aprobar su solicitud en este momento. Atentamente Su Banco',
                           );
                         }
                       },
@@ -333,24 +343,6 @@ class _DetallePageState extends State<DetallePage> {
     return '';
   }
 
-  Future<void> actualizarListaVerificacion(int id, String base64String) async {
-    var url = Uri.parse(
-        '${APIConfig.baseURL}controlcredito/actualizarListaVerificacion/$id?ListaVerificacion=$base64String');
-    var headers = {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Bearer ${APIConfig.authtoken}',
-    };
-    var body = {'ListaVerificacion': base64String};
-
-    var response = await http.put(url, headers: headers, body: body);
-
-    if (response.statusCode == 200) {
-      print('Documento actualizado correctamente');
-    } else {
-      print('Error al actualizar el documento');
-    }
-  }
-
   Future<void> listarAnexos(int id) async {
     print("ingresa");
     String url = "${APIConfig.baseURL}anexoCredito/buscarAnexos/$id";
@@ -360,12 +352,10 @@ class _DetallePageState extends State<DetallePage> {
     print(url);
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      print("Solicitudes obtenidas: ${jsonData}");
       setState(() {
         anexosss = jsonData
             .map<AnexoCredito>((item) => AnexoCredito.fromJson(item))
             .toList();
-        print(anexosss);
       });
     } else {
       print("Error al obtener la lista");
@@ -465,6 +455,7 @@ class _DetallePageState extends State<DetallePage> {
                     Navigator.pop(context);
                     setState(() {
                       disabledDownloadButtons.add(index);
+                      checkStatus[checkStatus.keys.elementAt(index)] = true;
                       camposNoaplica.add(checkStatus.keys.elementAt(index));
                     });
                   },
@@ -632,19 +623,22 @@ class _DetallePageState extends State<DetallePage> {
                   bool anyNoAplica = camposNoaplica.isNotEmpty;
                   bool anyNo =
                       checkStatus.values.any((element) => element == false);
-
-                  if (allChecked || anyNoAplica) {
-                    // Todos los campos están marcados como "Sí"
-                    setState(() {
-                      estado = 'Validada';
-                    });
-                  } else if (anyNo) {
-                    // Al menos un campo está marcado como "No"
+                  if (allChecked) {
+                    if (anyNoAplica == false || anyNoAplica == true) {
+                      setState(() {
+                        estado = 'Validada';
+                      });
+                    } else {
+                      setState(() {
+                        estado = 'Rechazada';
+                      });
+                    }
+                  } else {
                     setState(() {
                       estado = 'Rechazada';
                     });
                   }
-                  actualizarEstado(id, estado); // Agregué el prefijo 'await'
+                  actualizarEstado(id, estado);
                   print(estado);
                   _generateReport();
                   Navigator.pop(context);
@@ -666,4 +660,129 @@ class _DetallePageState extends State<DetallePage> {
     penStrokeWidth: 2,
     penColor: Color.fromARGB(255, 37, 8, 223),
   );
+
+  Future<pw.Document> generarReporteRechazo() async {
+    final pdf = pw.Document();
+    final signatureBytes = await _signatureController.toPngBytes();
+    final signatureImage = pw.MemoryImage(signatureBytes!);
+
+    final headerImage = pw.MemoryImage(
+      (await rootBundle.load('images/logo.png')).buffer.asUint8List(),
+    );
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [
+                  pw.Container(
+                    child: pw.Image(headerImage),
+                    alignment: pw.Alignment.center,
+                    width: 50,
+                  ),
+                  pw.SizedBox(width: 10),
+                  pw.Text(
+                    'SU BANCO',
+                    style: pw.TextStyle(
+                      color: PdfColors.blueGrey900,
+                      fontSize: 20,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 20),
+              pw.Text('Nombre del solicitante: ${widget.nombres}'),
+              pw.Text(
+                'Asesor: ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}',
+              ),
+              pw.SizedBox(height: 30),
+              pw.Center(
+                child: pw.Text(
+                  'Rechazo de Solicitud de Crédito',
+                  style: pw.TextStyle(
+                      fontSize: 20, fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              pw.SizedBox(height: 30),
+              pw.Text(
+                'Estimado ${widget.nombres},',
+              ),
+              pw.SizedBox(height: 10),
+              pw.Text(
+                'Luego de un meticuloso análisis de la información proporcionada en la solicitud con número ${widget.soliid}, nos vemos en la obligación de informarle que lamentablemente no podemos aprobar su solicitud de crédito en este momento.',
+                textAlign: pw.TextAlign.justify,
+              ),
+              pw.SizedBox(height: 10),
+              pw.Text(
+                'El rechazo de la solicitud de crédito es de acuerdo al Resumen del estado financiero del solicitante.',
+                textAlign: pw.TextAlign.justify,
+              ),
+              pw.SizedBox(height: 10),
+              pw.Text(
+                'Sentimos los inconvenientes ocasionados. Sírvase realizar un pedido nuevamente en otro momento cuando las condiciones cambien.',
+                textAlign: pw.TextAlign.justify,
+              ),
+              pw.SizedBox(height: 10),
+              pw.SizedBox(height: 10),
+              pw.SizedBox(height: 20),
+              pw.Text('Sinceramente,'),
+              pw.Text('Firma:'),
+              pw.Image(signatureImage, width: 100),
+              pw.Text(
+                'Nombre: ${usuario.persona.pers_nombres} ${usuario.persona.pers_apellidos}',
+              ),
+              pw.Text('Cedula: ${usuario.persona.pers_cedula}'),
+              pw.Text('Sucursal: ${usuario.sucursal.sucu_nombre}'),
+            ],
+          );
+        },
+      ),
+    );
+
+    final directory = await getTemporaryDirectory();
+    final filePath = '${directory.path}/rechazo_solicitud.pdf';
+    return pdf;
+  }
+
+  Future<void> sendEmailFile(
+      String toUser, String subject, String message) async {
+    final pdf = await generarReporteRechazo();
+
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/reporte_rechazo.pdf';
+
+    final file = File(filePath);
+    await file.writeAsBytes(await pdf.save());
+    var url = Uri.parse('${APIConfig.baseURL}sendMailFile');
+
+    var request = http.MultipartRequest('POST', url);
+    request.fields['toUser'] = toUser;
+    request.fields['subject'] = subject;
+    request.fields['message'] = message;
+    request.headers['Authorization'] = 'Bearer ${APIConfig.authtoken}';
+    request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      print('Correo electrónico enviado con éxito');
+    } else {
+      print('Error al enviar el correo electrónico');
+    }
+  }
+
+  Future<File> savePdfDocument(pw.Document pdf) async {
+    final directory =
+        await getTemporaryDirectory(); // O también puedes usar getApplicationDocumentsDirectory()
+    final filePath = '${directory.path}/rechazo_solicitud.pdf';
+
+    final file = File(filePath);
+    await file.writeAsBytes(await pdf.save());
+
+    return file;
+  }
 }

@@ -69,7 +69,6 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                 );
                 // Subir el PDF utilizando base64PDF o bytesPDF
                 // print('PDF convertido en base64: $base64PDF');
-                print('PDF convertido en bytes: $bytesPDF');
               }
             },
             child: Text('Subir'),
@@ -92,7 +91,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       request.headers['Authorization'] = 'Bearer ${APIConfig.authtoken}';
 
       var response = await request.send();
-
+      print(response);
+      print(id);
       if (response.statusCode == 201) {
         // La solicitud se realizó con éxito
         print('Actualización exitosa');
